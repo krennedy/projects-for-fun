@@ -1,0 +1,52 @@
+http://codegolf.stackexchange.com/questions/33172/american-gothic-in-the-palette-of-mona-lisa-rearrange-the-pixels
+	
+##############################################################
+
+You are given two true color images, the Source and the Palette. They do not necessarily have the same dimensions but it is guaranteed that their areas are the same, i.e. they have the same number of pixels.
+
+Your task is to create an algorithm that makes the most accurate looking copy of the Source by only using the pixels in the Palette. Each pixel in the Palette must be used exactly once in a unique position in this copy. The copy must have the same dimensions as the Source.
+
+##############################################################
+
+This Python script can be used ensure these constraints are met:
+
+from PIL import Image
+def check(palette, copy):
+    palette = sorted(Image.open(palette).convert('RGB').getdata())
+    copy = sorted(Image.open(copy).convert('RGB').getdata())
+    print 'Success' if copy == palette else 'Failed'
+
+check('palette.png', 'copy.png')
+
+Here are several pictures for testing. They all have the same area. Your algorithm should work for any two images with equal areas, not just American Gothic and the Mona Lisa. You should of course show your output.
+
+
+	
+
+You are given two true color images, the Source and the Palette. They do not necessarily have the same dimensions but it is guaranteed that their areas are the same, i.e. they have the same number of pixels.
+
+Your task is to create an algorithm that makes the most accurate looking copy of the Source by only using the pixels in the Palette. Each pixel in the Palette must be used exactly once in a unique position in this copy. The copy must have the same dimensions as the Source.
+
+This Python script can be used ensure these constraints are met:
+
+from PIL import Image
+def check(palette, copy):
+    palette = sorted(Image.open(palette).convert('RGB').getdata())
+    copy = sorted(Image.open(copy).convert('RGB').getdata())
+    print 'Success' if copy == palette else 'Failed'
+
+check('palette.png', 'copy.png')
+
+Here are several pictures for testing. They all have the same area. Your algorithm should work for any two images with equal areas, not just American Gothic and the Mona Lisa. You should of course show your output.
+
+American Gothic Mona Lisa Starry Night The Scream River Rainbow
+
+Thanks to Wikipedia for the images of famous paintings.
+Scoring
+
+This is a popularity contest so the highest voted answer wins. But I'm sure there's lots of ways to be creative with this!
+Animation
+
+millinon had the idea that it would be cool to see the pixels rearrange themselves. I thought so too so I wrote this Python script that takes two images made of the same colors and draws the intermediate images between them. Update: I just revised it so each pixel moves the minimum amount it has to. It is no longer random.
+
+First is the Mona Lisa turning into aditsu's American Gothic. Next is bitpwner's American Gothic (from Mona Lisa) turning into aditsu's. It's amazing that the two versions share the exact same color palette.
