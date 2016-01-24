@@ -4,9 +4,13 @@ import numpy as np
 import pandas as pd
 
 
-### OOh
+#
 # Or get average color of image, and map distance to that color?
-# Also - convert to int8 earlier
+# Also - only want uint8 once you go to PLOT. Til then int.
+# Identify bottlenecks
+# Add illustrator
+# Convert whole thing to enhanced dataframe object?
+
 fig = plt.figure(figsize=(14,10))
      
 class ImageObj():
@@ -23,6 +27,7 @@ class ImageObj():
         analysis image_dict shoudl eventually be an image
         But here as a dict, assuming initial processing done
         """
+        
         img = Image.open(path_to_jpg)
         img_pix = np.asarray(img)
 
@@ -30,10 +35,9 @@ class ImageObj():
         vstep = 100
         #img_pix = img_pix[vmin:vmin+vstep, vmin:vmin+vstep]
  
-        
-        R = img_pix[:,:,0].ravel()
-        G = img_pix[:,:,1].ravel()
-        B = img_pix[:,:,2].ravel()
+        R = img_pix[:,:,0].ravel().astype(int)
+        G = img_pix[:,:,1].ravel().astype(int)
+        B = img_pix[:,:,2].ravel().astype(int)
 
         x_dim = img_pix.shape[0]
         y_dim = img_pix.shape[1]
@@ -48,6 +52,8 @@ class ImageObj():
         self.df = pd.DataFrame(
             {'R': R, 'G': G, 'B': B, 'x': x, 'y': y}
         )
+        self.add_distance_to_black_as_column()
+        self.add_theta_colorwheel_as_column()
         
     def add_distance_to_black_as_column(self,):
         """
@@ -56,7 +62,6 @@ class ImageObj():
         """
         df = self.df
         self.df.loc[:, 'dist_to_black'] = df.R + df.G + df.B
-
         
     def add_theta_colorwheel_as_column(self,):
         """ Obvious shortcoming - orange reds will be very close to red, 
@@ -67,7 +72,7 @@ class ImageObj():
         df = self.df
         columns_keep = list(df.columns) # keep these + add 1 more
         
-        just_rgb = df[['R','G','B']].astype(int) # need int conv 4 negs
+        just_rgb = df[['R','G','B']]
         rg = just_rgb.R - just_rgb.G
         gb = just_rgb.G - just_rgb.B
         br = just_rgb.B - just_rgb.R
@@ -95,17 +100,6 @@ class ImageObj():
         columns_keep.append('theta_cwheel')
         self.df = df[columns_keep]
 
-        
-    #def add_dominant_color_as_column(self,):
-    #    """
-    #    Does R/G/B or None dominate?
-    #    """
-    #    idxmax = self.df[['R','G','B']].idxmax()
-    #    index = idxmax.values
-    #    maxvals = idxmax.index
-    #    self.df.loc[index, 'dominant_color'] = maxvals
-    #    self.df.fillna('None', inplace=True)
-
     def sort_by_distance_to_black(self,):
         """ Ascending, descending, who even cares.
         """
@@ -115,6 +109,17 @@ class ImageObj():
         """ Ascending, descending, who even cares.
         """
         self.df.sort(columns='theta_cwheel', inplace=True)
+
+    def sort_by_fancybins(self,):
+        """ Bin by darkness into N bins
+        Then sort by theta within those bins
+        """
+        self.sort_by_distance_to_black()
+        nbins = 3  # play with this to see what gets best results
+        
+        print self.df
+        stop
+        
         
     def rearrange_pixels(self, target):
         """
@@ -135,11 +140,10 @@ def do_all_preprocessing(path_to_jpg):
     This should probably be subdeffed above too.
     """
     img = ImageObj(path_to_jpg)
-    img.add_distance_to_black_as_column()
-    ###img.add_dominant_color_as_column()
-    img.add_theta_colorwheel_as_column()
-    #img.sort_by_distance_to_black()
-    img.sort_by_theta_colorwheel()
+    img.sort_by_distance_to_black()
+    #img.sort_by_theta_colorwheel()
+    #img.sort_by_fancybins()
+
     return img
 
 def make_plots(tgt, ref):
@@ -159,7 +163,8 @@ def make_plots(tgt, ref):
     ax = fig.add_subplot(223)
     pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
     ax.imshow(pix_map, interpolation=interpolation)
-    
+
+    plt.tight_layout()
     plt.show()
 
 def convert_to_imshow_format(df, xcol_name, ycol_name):
@@ -178,8 +183,8 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.astype(np.uint8)
     return rgb
 
-reference_path = 'figs/vermeer.jpg'
-target_path = 'figs/dali.jpg'
+target_path = 'figs/vermeer.jpg'
+reference_path = 'figs/dali.jpg'
 
 #reference_path = 'figs/vangogh.jpg'
 #reference_path = 'figs/beaux.jpg'
@@ -197,20 +202,6 @@ ref.rearrange_pixels(tgt)
 make_plots(tgt.df, ref.df)
 
     
-tgt_dict = dict(
-    R = [255, 000, 000, 255],
-    G = [000, 255, 000, 255],
-    B = [000, 000, 255, 255],
-    x = [0, 1, 0, 1],
-    y = [0, 0, 1, 1],
-)
-ref_dict = dict(
-    R = [025, 170, 205, 215],
-    G = [255, 075, 205, 045],
-    B = [125, 210, 205, 145],
-    x = [10, 11, 10, 11],
-    y = [10, 10, 11, 11],
-) # ref doesnt nec. need x & y, unless want to illustrate later... which I do!
 
 
 
