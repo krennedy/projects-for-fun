@@ -4,36 +4,19 @@ import numpy as np
 import pandas as pd
 
 
+### OOh
+# Or get average color of image, and map distance to that color?
+# Also - convert to int8 earlier
+fig = plt.figure(figsize=(14,10))
+
+
 def read_images():
     ref_file = 'figs/vangogh.jpg'
-    img_file = 'figs/beaux.jpg'
-
     ref = Image.open(ref_file)
-    img = Image.open(img_file)
-
     ref_pix = np.asarray(ref)
-    img_pix = np.asarray(img)
+    ax.imshow(ref_pix)
 
-    # Get miniarture versions
-    npix = 5
-    ref_mini = ref_pix[:npix]
-    img_mini = img_pix[:npix]
-
-    # Maybe bin according to if Red, Yellow, Blue is dominant color
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.imshow(img_pix)
-    print type(img_pix)
-    print type(img_pix[0][0][0])
-    #plt.show()
-    # DataFrame columns:
-    # index row col R G B index-of-ref
-    # Theta value?
-
-#read_images()
-#stop
-    
+     
 class ImageObj():
     """
     Some notes about this
@@ -41,16 +24,39 @@ class ImageObj():
     For which I basically append on function calls not native
     to Pandas?
     """
-    def __init__(self, image_dict):
+    
+    def __init__(self, path_to_jpg):
         
-        """
-        Testing to find the format I want for eventual analysis
-        image_dict shoudl eventually be an image
+        """ Testing to find the format I want for eventual 
+        analysis image_dict shoudl eventually be an image
         But here as a dict, assuming initial processing done
         """
+        img = Image.open(path_to_jpg)
+        img_pix = np.asarray(img)
 
-        self.df  = pd.DataFrame(image_dict)
+        vmin = 0
+        vstep = 100
+        #img_pix = img_pix[vmin:vmin+vstep, vmin:vmin+vstep]
+ 
+        
+        R = img_pix[:,:,0].ravel()
+        G = img_pix[:,:,1].ravel()
+        B = img_pix[:,:,2].ravel()
 
+        x_dim = img_pix.shape[0]
+        y_dim = img_pix.shape[1]
+
+        x_axis = np.arange(x_dim)
+        y_axis = np.arange(y_dim)
+        x, y = np.meshgrid(x_axis, y_axis)
+
+        x = x.ravel()
+        y = y.ravel()
+
+        self.df = pd.DataFrame(
+            {'R': R, 'G': G, 'B': B, 'x': x, 'y': y}
+        )
+        
     def add_distance_to_black_as_column(self,):
         """
         In this simplest iteration, distance to black is just
@@ -86,13 +92,13 @@ class ImageObj():
         self.df.loc[:, 'y_new'] = target.df.y.values
         
         
-def do_all_preprocessing(img_dict):
+def do_all_preprocessing(path_to_jpg):
     """
     Returns:
        img: the fully processed/sorted image
     This should probably be subdeffed above too.
     """
-    img = ImageObj(img_dict)
+    img = ImageObj(path_to_jpg)
     img.add_distance_to_black_as_column()
     img.add_dominant_color_as_column()
     img.sort_by_distance_to_black()
@@ -102,8 +108,6 @@ def make_plots(tgt, ref):
     """
     This should eventually be animated
     """
-    fig = plt.figure(figsize=(5,5))
-
     ax = fig.add_subplot(221)
     pix_map = convert_to_imshow_format(tgt, 'x', 'y')
     ax.imshow(pix_map, interpolation='none')
@@ -133,6 +137,21 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.reshape((x_dim, y_dim, 3))
     rgb = rgb.astype(np.uint8)
     return rgb
+
+target_path = 'figs/vangogh.jpg'
+reference_path = 'figs/beaux.jpg'
+
+tgt = do_all_preprocessing(target_path)
+ref = do_all_preprocessing(reference_path)
+ref.rearrange_pixels(tgt)
+make_plots(tgt.df, ref.df)
+stop
+
+tgt = do_all_preprocessing(tgt_dict)
+ref = do_all_preprocessing(ref_dict)
+ref.rearrange_pixels(tgt)
+make_plots(tgt.df, ref.df)
+
     
 tgt_dict = dict(
     R = [255, 000, 000, 255],
@@ -149,9 +168,5 @@ ref_dict = dict(
     y = [10, 10, 11, 11],
 ) # ref doesnt nec. need x & y, unless want to illustrate later... which I do!
 
-tgt = do_all_preprocessing(tgt_dict)
-ref = do_all_preprocessing(ref_dict)
-ref.rearrange_pixels(tgt)
-make_plots(tgt.df, ref.df)
 
 
