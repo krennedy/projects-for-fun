@@ -8,14 +8,6 @@ import pandas as pd
 # Or get average color of image, and map distance to that color?
 # Also - convert to int8 earlier
 fig = plt.figure(figsize=(14,10))
-
-
-def read_images():
-    ref_file = 'figs/vangogh.jpg'
-    ref = Image.open(ref_file)
-    ref_pix = np.asarray(ref)
-    ax.imshow(ref_pix)
-
      
 class ImageObj():
     """
@@ -64,22 +56,66 @@ class ImageObj():
         """
         df = self.df
         self.df.loc[:, 'dist_to_black'] = df.R + df.G + df.B
-  
-    def add_dominant_color_as_column(self,):
+
+        
+    def add_theta_colorwheel_as_column(self,):
+        """ Obvious shortcoming - orange reds will be very close to red, 
+        but purple reds will be very far.
+        Maybe can solve this by resetting scale near least dense portion 
+        of colormap?
         """
-        Does R/G/B or None dominate?
-        """
-        idxmax = self.df[['R','G','B']].idxmax()
-        index = idxmax.values
-        maxvals = idxmax.index
-        self.df.loc[index, 'dominant_color'] = maxvals
-        self.df.fillna('None', inplace=True)
+        df = self.df
+        columns_keep = list(df.columns) # keep these + add 1 more
+        
+        just_rgb = df[['R','G','B']].astype(int) # need int conv 4 negs
+        rg = just_rgb.R - just_rgb.G
+        gb = just_rgb.G - just_rgb.B
+        br = just_rgb.B - just_rgb.R
+        
+        which_least = just_rgb.apply(np.argmin, axis=1)
+        df.loc[:, 'which_least'] = which_least
+
+        df.loc[:, 'rg'] = rg
+        df.loc[:, 'gb'] = gb
+        df.loc[:, 'br'] = br
+        
+        map_dict = {'R': 'gb', 'G': 'br', 'B': 'rg'}
+        df.loc[:, 'which2use'] = df.which_least.map(map_dict)
+
+        df.loc[:, 'val'] = df.apply(
+            lambda row: row[row['which2use']], axis=1)
+        df.loc[:, 'val'] = df.loc[:, 'val'] / 255.
+
+        delta_theta = np.arccos(df.val)
+        map_dict = {'rg': 0, 'gb': 2*np.pi/3., 'br': 4*np.pi/3.}
+        theta_offset = df.which2use.map(map_dict)
+
+        df.loc[:, 'theta_cwheel'] = delta_theta + theta_offset
+
+        columns_keep.append('theta_cwheel')
+        self.df = df[columns_keep]
+
+        
+    #def add_dominant_color_as_column(self,):
+    #    """
+    #    Does R/G/B or None dominate?
+    #    """
+    #    idxmax = self.df[['R','G','B']].idxmax()
+    #    index = idxmax.values
+    #    maxvals = idxmax.index
+    #    self.df.loc[index, 'dominant_color'] = maxvals
+    #    self.df.fillna('None', inplace=True)
 
     def sort_by_distance_to_black(self,):
         """ Ascending, descending, who even cares.
         """
         self.df.sort(columns='dist_to_black', inplace=True)
 
+    def sort_by_theta_colorwheel(self,):
+        """ Ascending, descending, who even cares.
+        """
+        self.df.sort(columns='theta_cwheel', inplace=True)
+        
     def rearrange_pixels(self, target):
         """
         Here, target is the target image. 
@@ -100,25 +136,29 @@ def do_all_preprocessing(path_to_jpg):
     """
     img = ImageObj(path_to_jpg)
     img.add_distance_to_black_as_column()
-    img.add_dominant_color_as_column()
-    img.sort_by_distance_to_black()
+    ###img.add_dominant_color_as_column()
+    img.add_theta_colorwheel_as_column()
+    #img.sort_by_distance_to_black()
+    img.sort_by_theta_colorwheel()
     return img
 
 def make_plots(tgt, ref):
     """
     This should eventually be animated
     """
+    interpolation='hanning'
+    
     ax = fig.add_subplot(221)
     pix_map = convert_to_imshow_format(tgt, 'x', 'y')
-    ax.imshow(pix_map, interpolation='none')
+    ax.imshow(pix_map, interpolation=interpolation, cmap=plt.get_cmap('gray'))
 
     ax = fig.add_subplot(222)
     pix_map = convert_to_imshow_format(ref, 'x', 'y')
-    ax.imshow(pix_map, interpolation='none')
+    ax.imshow(pix_map, interpolation=interpolation)
 
     ax = fig.add_subplot(223)
     pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
-    ax.imshow(pix_map, interpolation='none')
+    ax.imshow(pix_map, interpolation=interpolation)
     
     plt.show()
 
@@ -138,8 +178,12 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.astype(np.uint8)
     return rgb
 
-target_path = 'figs/vangogh.jpg'
-reference_path = 'figs/beaux.jpg'
+reference_path = 'figs/vermeer.jpg'
+target_path = 'figs/dali.jpg'
+
+#reference_path = 'figs/vangogh.jpg'
+#reference_path = 'figs/beaux.jpg'
+#target_path = 'figs/temp_colorchart.jpg'
 
 tgt = do_all_preprocessing(target_path)
 ref = do_all_preprocessing(reference_path)
