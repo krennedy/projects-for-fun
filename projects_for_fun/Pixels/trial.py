@@ -6,7 +6,6 @@ import pandas as pd
 
 #
 # Or get average color of image, and map distance to that color?
-# Also - only want uint8 once you go to PLOT. Til then int.
 # Identify bottlenecks
 # Add illustrator
 # Convert whole thing to enhanced dataframe object?
@@ -161,27 +160,31 @@ def make_plots(tgt, ref):
     """
     This should eventually be animated
     """
-    interpolation='hanning'
-    
     ax = fig.add_subplot(221)
     pix_map = convert_to_imshow_format(tgt, 'x', 'y')
-    ax.imshow(pix_map, interpolation=interpolation)
+    do_imshow(ax, pix_map)
 
     ax = fig.add_subplot(222)
     pix_map = convert_to_imshow_format(ref, 'x', 'y')
-    ax.imshow(pix_map, interpolation=interpolation)
+    do_imshow(ax, pix_map)
 
     ax = fig.add_subplot(223)
     pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
-    ax.imshow(pix_map, interpolation=interpolation)
+    do_imshow(ax, pix_map)
 
     ax = fig.add_subplot(224)
     pix_map = convert_to_imshow_format(tgt, 'x_new', 'y_new')
-    ax.imshow(pix_map, interpolation=interpolation)
+    do_imshow(ax, pix_map)
     
     plt.tight_layout()
     plt.show()
 
+def do_imshow(ax, pix_map):
+    interpolation='none'
+    ax.imshow(pix_map, interpolation=interpolation)
+    plt.yticks([],[])
+    plt.xticks([],[])
+    
 def convert_to_imshow_format(df, xcol_name, ycol_name):
     """
     PM what it says
@@ -198,12 +201,11 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.astype(np.uint8)
     return rgb
 
-#target_path = 'figs/vermeer.jpg'
-#reference_path = 'figs/dali.jpg'
+target_path = 'figs/vermeer.jpg'
+reference_path = 'figs/dali.jpg'
 
-reference_path = 'figs/vangogh.jpg'
-target_path = 'figs/beaux.jpg'
-#target_path = 'figs/temp_colorchart.jpg'
+#reference_path = 'figs/vangogh.jpg'
+#target_path = 'figs/beaux.jpg'
 
 tgt = do_all_preprocessing(target_path)
 ref = do_all_preprocessing(reference_path)
