@@ -10,6 +10,7 @@ import pandas as pd
 # Identify bottlenecks
 # Add illustrator
 # Convert whole thing to enhanced dataframe object?
+# Handle different sized inputs
 
 fig = plt.figure(figsize=(14,10))
      
@@ -54,7 +55,7 @@ class ImageObj():
         )
         self.add_distance_to_black_as_column()
         self.add_theta_colorwheel_as_column()
-        
+
     def add_distance_to_black_as_column(self,):
         """
         In this simplest iteration, distance to black is just
@@ -101,26 +102,30 @@ class ImageObj():
         self.df = df[columns_keep]
 
     def sort_by_distance_to_black(self,):
-        """ Ascending, descending, who even cares.
-        """
-        self.df.sort(columns='dist_to_black', inplace=True)
+        self.df = sort_by_column(self.df, 'dist_to_black')
 
     def sort_by_theta_colorwheel(self,):
-        """ Ascending, descending, who even cares.
-        """
-        self.df.sort(columns='theta_cwheel', inplace=True)
+        self.df = sort_by_column(self.df, 'theta_cwheel')
 
     def sort_by_fancybins(self,):
         """ Bin by darkness into N bins
         Then sort by theta within those bins
         """
         self.sort_by_distance_to_black()
-        nbins = 3  # play with this to see what gets best results
+        df = self.df
+
+        npix = len(df)
+        arr = np.arange(npix)
+        nbins = 10
+        n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
+        dist_to_black_broad = arr/n_per_chunk
         
-        print self.df
-        stop
-        
-        
+        df.loc[:, 'dist_to_black_broad'] = dist_to_black_broad
+
+        # Then sort by theta_cwheel within black
+        df = sort_by_column(df, ['dist_to_black_broad', 'theta_cwheel'])
+        self.df = df
+                
     def rearrange_pixels(self, target):
         """
         Here, target is the target image. 
@@ -132,7 +137,13 @@ class ImageObj():
         self.df.loc[:, 'x_new'] = target.df.x.values
         self.df.loc[:, 'y_new'] = target.df.y.values
         
-        
+
+def sort_by_column(df, col_name):
+    """ Ascending, descending, who even cares.
+    """
+    df.sort(columns=col_name, inplace=True)
+    return df
+
 def do_all_preprocessing(path_to_jpg):
     """
     Returns:
@@ -140,9 +151,9 @@ def do_all_preprocessing(path_to_jpg):
     This should probably be subdeffed above too.
     """
     img = ImageObj(path_to_jpg)
-    img.sort_by_distance_to_black()
+    #img.sort_by_distance_to_black()
     #img.sort_by_theta_colorwheel()
-    #img.sort_by_fancybins()
+    img.sort_by_fancybins()
 
     return img
 
@@ -154,7 +165,7 @@ def make_plots(tgt, ref):
     
     ax = fig.add_subplot(221)
     pix_map = convert_to_imshow_format(tgt, 'x', 'y')
-    ax.imshow(pix_map, interpolation=interpolation, cmap=plt.get_cmap('gray'))
+    ax.imshow(pix_map, interpolation=interpolation)
 
     ax = fig.add_subplot(222)
     pix_map = convert_to_imshow_format(ref, 'x', 'y')
@@ -164,6 +175,10 @@ def make_plots(tgt, ref):
     pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
     ax.imshow(pix_map, interpolation=interpolation)
 
+    ax = fig.add_subplot(224)
+    pix_map = convert_to_imshow_format(tgt, 'x_new', 'y_new')
+    ax.imshow(pix_map, interpolation=interpolation)
+    
     plt.tight_layout()
     plt.show()
 
@@ -183,25 +198,16 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.astype(np.uint8)
     return rgb
 
-target_path = 'figs/vermeer.jpg'
-reference_path = 'figs/dali.jpg'
+#target_path = 'figs/vermeer.jpg'
+#reference_path = 'figs/dali.jpg'
 
-#reference_path = 'figs/vangogh.jpg'
-#reference_path = 'figs/beaux.jpg'
+reference_path = 'figs/vangogh.jpg'
+target_path = 'figs/beaux.jpg'
 #target_path = 'figs/temp_colorchart.jpg'
 
 tgt = do_all_preprocessing(target_path)
 ref = do_all_preprocessing(reference_path)
 ref.rearrange_pixels(tgt)
+tgt.rearrange_pixels(ref)
 make_plots(tgt.df, ref.df)
-stop
-
-tgt = do_all_preprocessing(tgt_dict)
-ref = do_all_preprocessing(ref_dict)
-ref.rearrange_pixels(tgt)
-make_plots(tgt.df, ref.df)
-
-    
-
-
 
