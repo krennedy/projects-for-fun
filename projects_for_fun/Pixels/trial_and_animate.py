@@ -11,13 +11,6 @@ import matplotlib.animation as animation
 # Convert whole thing to enhanced dataframe object?
 # Handle different sized inputs
 
-fig = plt.figure(figsize=(14,10))
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
-
-
 class ImageObj():
     """
     Some notes about this
@@ -184,15 +177,18 @@ def make_plots(tgt, ref):
     plt.tight_layout()
     plt.show()
 
+    
 def do_imshow(ax, pix_map):
     interpolation='none'
     ax.imshow(pix_map, interpolation=interpolation)
     plt.yticks([],[])
     plt.xticks([],[])
+
     
 def convert_to_imshow_format(df, xcol_name, ycol_name):
     """
-    PM what it says
+    PM what it says.
+    Takes almost no time!
     """
     xmin = df[xcol_name].min()
     xmax = df[xcol_name].max()
@@ -204,44 +200,7 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = df[['R','G','B']].values
     rgb = rgb.reshape((x_dim, y_dim, 3))
     rgb = rgb.astype(np.uint8)
-    return rgb
-
-###############
-# WOULD BE NICE OBJECT ORIENT ANIMATION STUFF TOO?
-###############
-nstep = 500
-
-def take_out(img, i):
-    img_shape = img.shape
-    img = img.reshape(img_shape[0]* img_shape[1], img_shape[2])
-    img[i:i+nstep] = np.array([255,255,255]).astype('uint8')
-    img = img.reshape(img_shape)
-    return img 
-
-def put_in(img_put, img_pull, i):
-    """ Here, you want to put in a few pixels of new image
-    But using the values input from another image
-    !!! img_pull shouldnt need to have to be flattened each time
-    """
-    img_shape = img_put.shape
-    new_shape = (img_shape[0]* img_shape[1], img_shape[2])
-    img_put = img_put.reshape(new_shape)
-    img_pull = img_pull.reshape(new_shape)
-    img_put[i:i+nstep] = img_pull[i+nstep]
-    img_put = img_put.reshape(img_shape)
-    return img_put
-
-def updatefig(j):
-    im1.set_array(take_out(pix_tgt, j))
-    im2.set_array(take_out(pix_ref, j))
-    im3.set_array(put_in(pix_ref_new, pix_tgt_original, j))
-    return im1, im2, im3
-
-def make_animations(tgt, ref):
-    """ Here tgt and ref are just the dataframes
-    """
-    pass
-
+    return rgb, df
 
 
 target_path = 'figs/vermeer.jpg'
@@ -257,19 +216,84 @@ tgt.rearrange_pixels(ref)
 #make_plots(tgt.df, ref.df)
 #make_animations(tgt.df, ref.df)
 
-pix_tgt = convert_to_imshow_format(tgt.df, 'x', 'y')
-pix_ref = convert_to_imshow_format(ref.df, 'x', 'y')
+
+pix_tgt, df_tgt_sorted = convert_to_imshow_format(tgt.df, 'x', 'y')
+pix_ref, df_ref_sorted = convert_to_imshow_format(ref.df, 'x', 'y')
+
+
+###############
+# WOULD BE NICE OBJECT ORIENT ANIMATION STUFF TOO?
+###############
+nstep = 500
+
+fig = plt.figure(figsize=(14,10))
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
 
 pix_ref_new = np.ones(pix_ref.shape).astype('uint8') * 255
+pix_tgt_new = np.ones(pix_tgt.shape).astype('uint8') * 255
 pix_tgt_original = pix_tgt.copy()
+pix_ref_original = pix_ref.copy()
+
+
+def take_out(img, i, orig):
+    img_shape = img.shape
+    img = img.reshape(img_shape[0]* img_shape[1], img_shape[2])
+    img[i:i+nstep] = np.array([155,155,155]).astype('uint8')
+    img = img.reshape(img_shape)
+    if i+nstep >= img_shape[0]* img_shape[1]:
+        img = orig
+    return img 
+
+def put_in(img_put, img_pull, df_sorted, i):
+    """ Here, you want to put in a few pixels of new image
+    But using the values input from another image
+    !!! img_pull shouldnt need to have to be flattened each time
+    """
+    img_shape = img_put.shape
+    new_shape = (img_shape[0]* img_shape[1], img_shape[2])
+
+    
+    img_put = img_put.reshape(new_shape)
+    img_pull = img_pull.reshape(new_shape)
+
+    x_new = df_sorted.x_new
+    y_new = df_sorted.y_new
+    x_dim = x_new.max() + 1
+    y_dim = y_new.max() + 1
+    positions = y_new * x_dim + x_new # or reverse x's and y's
+    positions_this_time = positions[i:i+nstep]
+    
+    img_put[positions_this_time] = img_pull[i:i+nstep]
+
+    img_put = img_put.reshape(img_shape)
+    return img_put
+
+def updatefig(j):
+    """ Update att 4
+    """
+    im1.set_array(take_out(pix_tgt, j, pix_tgt_original))
+    im2.set_array(take_out(pix_ref, j, pix_ref_original))
+    im3.set_array(put_in(pix_ref_new, pix_tgt_original, df_tgt_sorted, j))
+    im4.set_array(put_in(pix_tgt_new, pix_ref_original, df_ref_sorted, j))
+    return im1, im2, im3, im4
+
+def make_animations(tgt, ref):
+    """ Here tgt and ref are just the dataframes
+    """
+    pass
+
 
 # Initialize
-i=0
-im1 = ax1.imshow(take_out(pix_tgt, i), animated=True, interpolation='none')
-im2 = ax2.imshow(take_out(pix_ref, i), animated=True, interpolation='none')
-im3 = ax3.imshow(pix_ref, animated=True, interpolation='none')
+im1 = ax1.imshow(pix_tgt, animated=True, interpolation='none')
+im2 = ax2.imshow(pix_ref, animated=True, interpolation='none')
+im3 = ax3.imshow(pix_ref_new, animated=True, interpolation='none')
+im4 = ax4.imshow(pix_tgt_new, animated=True, interpolation='none')
+
 
 npix = pix_tgt.shape[0] * pix_tgt.shape[1]
-ani = animation.FuncAnimation(fig, updatefig, np.arange(0, npix-500, 500),
-                              interval=100, blit=False)
+ani = animation.FuncAnimation(fig, updatefig, np.arange(0, npix, 500),
+                              interval=100, blit=False, repeat=False)
 plt.show()
