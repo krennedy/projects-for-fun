@@ -7,9 +7,15 @@ import matplotlib.animation as animation
 #
 # Or get average color of image, and map distance to that color?
 # Identify bottlenecks
-# Add illustrator
 # Convert whole thing to enhanced dataframe object?
 # Handle different sized inputs
+
+fig = plt.figure(figsize=(14,10))
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
 
 class ImageObj():
     """
@@ -28,10 +34,6 @@ class ImageObj():
         
         img = Image.open(path_to_jpg)
         img_pix = np.asarray(img)
-
-        vmin = 0
-        vstep = 100
-        #img_pix = img_pix[vmin:vmin+vstep, vmin:vmin+vstep]
  
         R = img_pix[:,:,0].ravel().astype(int)
         G = img_pix[:,:,1].ravel().astype(int)
@@ -98,29 +100,24 @@ class ImageObj():
         columns_keep.append('theta_cwheel')
         self.df = df[columns_keep]
 
-    def sort_by_distance_to_black(self,):
-        self.df = sort_by_column(self.df, 'dist_to_black')
-
-    def sort_by_theta_colorwheel(self,):
-        self.df = sort_by_column(self.df, 'theta_cwheel')
 
     def sort_by_fancybins(self,):
         """ Bin by darkness into N bins
         Then sort by theta within those bins
         """
-        self.sort_by_distance_to_black()
+        self.df.sort(columns='dist_to_black', inplace=True)
         df = self.df
 
         npix = len(df)
         arr = np.arange(npix)
-        nbins = 10
+        nbins = 20
         n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
         dist_to_black_broad = arr/n_per_chunk
         
         df.loc[:, 'dist_to_black_broad'] = dist_to_black_broad
 
         # Then sort by theta_cwheel within black
-        df = sort_by_column(df, ['dist_to_black_broad', 'theta_cwheel'])
+        df.sort(columns=['dist_to_black_broad', 'theta_cwheel'], inplace=True)
         self.df = df
                 
     def rearrange_pixels(self, target):
@@ -133,57 +130,95 @@ class ImageObj():
         """
         self.df.loc[:, 'x_new'] = target.df.x.values
         self.df.loc[:, 'y_new'] = target.df.y.values
-        
 
-def sort_by_column(df, col_name):
-    """ Ascending, descending, who even cares.
-    """
-    df.sort(columns=col_name, inplace=True)
-    return df
 
-def do_all_preprocessing(path_to_jpg):
+class Animator():
+    
+    def __init__(self, A_df, B_df):
+        self.pix_A, self.df_A_sorted = convert_to_imshow_format(A_df, 'x', 'y')
+        self.pix_B, self.df_B_sorted = convert_to_imshow_format(B_df, 'x', 'y')
+                
+        self.pix_B_new = np.ones(self.pix_B.shape).astype('uint8') * 255
+        self.pix_A_new = np.ones(self.pix_A.shape).astype('uint8') * 255
+        self.pix_A_original = self.pix_A.copy()
+        self.pix_B_original = self.pix_B.copy()
+
+        # Initialize
+        kwargs = dict(animated=True, interpolation='none')
+        self.im1 = ax1.imshow(self.pix_A, **kwargs)
+        self.im2 = ax2.imshow(self.pix_B, **kwargs)
+        self.im3 = ax3.imshow(self.pix_B_new, **kwargs)
+        self.im4 = ax4.imshow(self.pix_A_new, **kwargs)
+
+        nsteps = 10
+        self.npix = self.pix_A.shape[0] * self.pix_A.shape[1]
+        self.nstep = int(self.npix/float(nsteps))
+
+    def draw(self,):
+        ani = animation.FuncAnimation(
+            fig, self.updatefig,
+            np.arange(0, self.npix, self.nstep),
+            interval=100, blit=False, repeat=False)
+        plt.show()
+
+    def updatefig(self, j):
+        """ Update att 4
+        """
+        self.im1.set_array(self.take_out(self.pix_A, j))
+        self.im2.set_array(self.take_out(self.pix_B, j))
+        self.im3.set_array(self.put_in(self.pix_B_new, self.pix_A_original,
+                                       self.df_A_sorted, j))
+        self.im4.set_array(self.put_in(self.pix_A_new, self.pix_B_original,
+                                       self.df_B_sorted, j))
+
+        # return top row to original state if at end of animation
+        if j+self.nstep >= len(self.df_A_sorted):
+            self.im1.set_array(self.pix_A_original)
+            self.im2.set_array(self.pix_B_original)
+
+    def take_out(self,img, i):
+        img_shape = img.shape
+        img = img.reshape(img_shape[0]* img_shape[1], img_shape[2])
+        img[i:i+self.nstep] = np.array([155,155,155]).astype('uint8')
+        img = img.reshape(img_shape)
+
+        return img 
+
+    def put_in(self,img_put, img_pull, df_sorted, i):
+        """ Here, you want to put in a few pixels of new image
+        But using the values input from another image
+        !!! img_pull shouldnt need to have to be flattened each time
+        """
+        img_shape = img_put.shape
+        new_shape = (img_shape[0]* img_shape[1], img_shape[2])
+
+
+        img_put = img_put.reshape(new_shape)
+        img_pull = img_pull.reshape(new_shape)
+
+        x_new = df_sorted.x_new
+        y_new = df_sorted.y_new
+        x_dim = x_new.max() + 1
+        y_dim = y_new.max() + 1
+        positions = y_new * x_dim + x_new # or reverse x's and y's
+        positions_this_time = positions[i:i+self.nstep]
+
+        img_put[positions_this_time] = img_pull[i:i+self.nstep]
+
+        img_put = img_put.reshape(img_shape)
+        return img_put
+
+
+def preprocess(path_to_jpg):
     """
     Returns:
        img: the fully processed/sorted image
     This should probably be subdeffed above too.
     """
     img = ImageObj(path_to_jpg)
-    #img.sort_by_distance_to_black()
-    #img.sort_by_theta_colorwheel()
     img.sort_by_fancybins()
-
+    
     return img
-
-def make_plots(tgt, ref):
-    """
-    This should eventually be animated
-    """
-    ax = fig.add_subplot(221)
-    pix_map = convert_to_imshow_format(tgt, 'x', 'y')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(222)
-    pix_map = convert_to_imshow_format(ref, 'x', 'y')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(223)
-    pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(224)
-    pix_map = convert_to_imshow_format(tgt, 'x_new', 'y_new')
-    do_imshow(ax, pix_map)
-    
-    plt.tight_layout()
-    plt.show()
-
-    
-def do_imshow(ax, pix_map):
-    interpolation='none'
-    ax.imshow(pix_map, interpolation=interpolation)
-    plt.yticks([],[])
-    plt.xticks([],[])
-
     
 def convert_to_imshow_format(df, xcol_name, ycol_name):
     """
@@ -202,98 +237,21 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
     rgb = rgb.astype(np.uint8)
     return rgb, df
 
-
-target_path = 'figs/vermeer.jpg'
-reference_path = 'figs/dali.jpg'
-
-#reference_path = 'figs/vangogh.jpg'
-#target_path = 'figs/beaux.jpg'
-
-tgt = do_all_preprocessing(target_path)
-ref = do_all_preprocessing(reference_path)
-ref.rearrange_pixels(tgt)
-tgt.rearrange_pixels(ref)
-#make_plots(tgt.df, ref.df)
-#make_animations(tgt.df, ref.df)
-
-
-pix_tgt, df_tgt_sorted = convert_to_imshow_format(tgt.df, 'x', 'y')
-pix_ref, df_ref_sorted = convert_to_imshow_format(ref.df, 'x', 'y')
-
-
-###############
-# WOULD BE NICE OBJECT ORIENT ANIMATION STUFF TOO?
-###############
-nstep = 500
-
-fig = plt.figure(figsize=(14,10))
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
-
-pix_ref_new = np.ones(pix_ref.shape).astype('uint8') * 255
-pix_tgt_new = np.ones(pix_tgt.shape).astype('uint8') * 255
-pix_tgt_original = pix_tgt.copy()
-pix_ref_original = pix_ref.copy()
-
-
-def take_out(img, i, orig):
-    img_shape = img.shape
-    img = img.reshape(img_shape[0]* img_shape[1], img_shape[2])
-    img[i:i+nstep] = np.array([155,155,155]).astype('uint8')
-    img = img.reshape(img_shape)
-    if i+nstep >= img_shape[0]* img_shape[1]:
-        img = orig
-    return img 
-
-def put_in(img_put, img_pull, df_sorted, i):
-    """ Here, you want to put in a few pixels of new image
-    But using the values input from another image
-    !!! img_pull shouldnt need to have to be flattened each time
-    """
-    img_shape = img_put.shape
-    new_shape = (img_shape[0]* img_shape[1], img_shape[2])
-
     
-    img_put = img_put.reshape(new_shape)
-    img_pull = img_pull.reshape(new_shape)
+def main():
+    A_path = 'figs/vermeer.jpg'
+    B_path = 'figs/dali.jpg'
 
-    x_new = df_sorted.x_new
-    y_new = df_sorted.y_new
-    x_dim = x_new.max() + 1
-    y_dim = y_new.max() + 1
-    positions = y_new * x_dim + x_new # or reverse x's and y's
-    positions_this_time = positions[i:i+nstep]
-    
-    img_put[positions_this_time] = img_pull[i:i+nstep]
+    A_obj = preprocess(A_path)
+    B_obj = preprocess(B_path)
 
-    img_put = img_put.reshape(img_shape)
-    return img_put
+    A_obj.rearrange_pixels(B_obj)
+    B_obj.rearrange_pixels(A_obj)
 
-def updatefig(j):
-    """ Update att 4
-    """
-    im1.set_array(take_out(pix_tgt, j, pix_tgt_original))
-    im2.set_array(take_out(pix_ref, j, pix_ref_original))
-    im3.set_array(put_in(pix_ref_new, pix_tgt_original, df_tgt_sorted, j))
-    im4.set_array(put_in(pix_tgt_new, pix_ref_original, df_ref_sorted, j))
-    return im1, im2, im3, im4
-
-def make_animations(tgt, ref):
-    """ Here tgt and ref are just the dataframes
-    """
-    pass
+    an_example = Animator(A_obj.df, B_obj.df)
+    an_example.draw()
 
 
-# Initialize
-im1 = ax1.imshow(pix_tgt, animated=True, interpolation='none')
-im2 = ax2.imshow(pix_ref, animated=True, interpolation='none')
-im3 = ax3.imshow(pix_ref_new, animated=True, interpolation='none')
-im4 = ax4.imshow(pix_tgt_new, animated=True, interpolation='none')
+main()
 
 
-npix = pix_tgt.shape[0] * pix_tgt.shape[1]
-ani = animation.FuncAnimation(fig, updatefig, np.arange(0, npix, 500),
-                              interval=100, blit=False, repeat=False)
-plt.show()
