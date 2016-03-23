@@ -1,18 +1,8 @@
 import Image
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 
-#
-# Or get average color of image, and map distance to that color?
-# Identify bottlenecks
-# Add illustrator
-# Convert whole thing to enhanced dataframe object?
-# Handle different sized inputs
-
-fig = plt.figure(figsize=(14,10))
-     
 class ImageObj():
     """
     Some notes about this
@@ -30,10 +20,6 @@ class ImageObj():
         
         img = Image.open(path_to_jpg)
         img_pix = np.asarray(img)
-
-        vmin = 0
-        vstep = 100
-        #img_pix = img_pix[vmin:vmin+vstep, vmin:vmin+vstep]
  
         R = img_pix[:,:,0].ravel().astype(int)
         G = img_pix[:,:,1].ravel().astype(int)
@@ -100,29 +86,24 @@ class ImageObj():
         columns_keep.append('theta_cwheel')
         self.df = df[columns_keep]
 
-    def sort_by_distance_to_black(self,):
-        self.df = sort_by_column(self.df, 'dist_to_black')
-
-    def sort_by_theta_colorwheel(self,):
-        self.df = sort_by_column(self.df, 'theta_cwheel')
 
     def sort_by_fancybins(self,):
         """ Bin by darkness into N bins
         Then sort by theta within those bins
         """
-        self.sort_by_distance_to_black()
+        self.df.sort(columns='dist_to_black', inplace=True)
         df = self.df
 
         npix = len(df)
         arr = np.arange(npix)
-        nbins = 10
+        nbins = 20
         n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
         dist_to_black_broad = arr/n_per_chunk
         
         df.loc[:, 'dist_to_black_broad'] = dist_to_black_broad
 
         # Then sort by theta_cwheel within black
-        df = sort_by_column(df, ['dist_to_black_broad', 'theta_cwheel'])
+        df.sort(columns=['dist_to_black_broad', 'theta_cwheel'], inplace=True)
         self.df = df
                 
     def rearrange_pixels(self, target):
@@ -135,81 +116,3 @@ class ImageObj():
         """
         self.df.loc[:, 'x_new'] = target.df.x.values
         self.df.loc[:, 'y_new'] = target.df.y.values
-        
-
-def sort_by_column(df, col_name):
-    """ Ascending, descending, who even cares.
-    """
-    df.sort(columns=col_name, inplace=True)
-    return df
-
-def do_all_preprocessing(path_to_jpg):
-    """
-    Returns:
-       img: the fully processed/sorted image
-    This should probably be subdeffed above too.
-    """
-    img = ImageObj(path_to_jpg)
-    #img.sort_by_distance_to_black()
-    #img.sort_by_theta_colorwheel()
-    img.sort_by_fancybins()
-
-    return img
-
-def make_plots(tgt, ref):
-    """
-    This should eventually be animated
-    """
-    ax = fig.add_subplot(221)
-    pix_map = convert_to_imshow_format(tgt, 'x', 'y')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(222)
-    pix_map = convert_to_imshow_format(ref, 'x', 'y')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(223)
-    pix_map = convert_to_imshow_format(ref, 'x_new', 'y_new')
-    do_imshow(ax, pix_map)
-
-    ax = fig.add_subplot(224)
-    pix_map = convert_to_imshow_format(tgt, 'x_new', 'y_new')
-    do_imshow(ax, pix_map)
-    
-    plt.tight_layout()
-    plt.show()
-
-def do_imshow(ax, pix_map):
-    interpolation='none'
-    ax.imshow(pix_map, interpolation=interpolation)
-    plt.yticks([],[])
-    plt.xticks([],[])
-    
-def convert_to_imshow_format(df, xcol_name, ycol_name):
-    """
-    PM what it says
-    """
-    xmin = df[xcol_name].min()
-    xmax = df[xcol_name].max()
-    ymin = df[ycol_name].min()
-    ymax = df[ycol_name].max()
-    x_dim = xmax - xmin + 1
-    y_dim = ymax - ymin + 1
-    df.sort(columns=[ycol_name, xcol_name], inplace=True)
-    rgb = df[['R','G','B']].values
-    rgb = rgb.reshape((x_dim, y_dim, 3))
-    rgb = rgb.astype(np.uint8)
-    return rgb
-
-target_path = 'figs/vermeer.jpg'
-reference_path = 'figs/dali.jpg'
-
-#reference_path = 'figs/vangogh.jpg'
-#target_path = 'figs/beaux.jpg'
-
-tgt = do_all_preprocessing(target_path)
-ref = do_all_preprocessing(reference_path)
-ref.rearrange_pixels(tgt)
-tgt.rearrange_pixels(ref)
-make_plots(tgt.df, ref.df)
-
