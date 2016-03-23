@@ -1,0 +1,6 @@
+from lxml import html
+import requests
+
+page = requests.get('https://www.whisky.com/whisky-database/bottle-search/fdb/Bottles.html?tx_datamintsflaschendb_pi4[resultListLayout]=1&cHash=662d61e52a87859a720519124b58b568#dm_flaschendb_flasche_search_sorting')
+tree = html.fromstring(page.content)
+tree.xpath('//span[@class="marke"]/text()')
