@@ -1,7 +1,8 @@
+from tools.utils import convert_to_imshow_format
+
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
-from imager import ImageObj
 
 #
 # Or get average color of image, and map distance to that color?
@@ -90,51 +91,5 @@ class Animator():
 
         img_put = img_put.reshape(img_shape)
         return img_put
-
-
-def preprocess(path_to_jpg):
-    """
-    Returns:
-       img: the fully processed/sorted image
-    This should probably be subdeffed above too.
-    """
-    img = ImageObj(path_to_jpg)
-    img.sort_by_fancybins()
-    
-    return img
-    
-def convert_to_imshow_format(df, xcol_name, ycol_name):
-    """
-    PM what it says.
-    Takes almost no time!
-    """
-    xmin = df[xcol_name].min()
-    xmax = df[xcol_name].max()
-    ymin = df[ycol_name].min()
-    ymax = df[ycol_name].max()
-    x_dim = xmax - xmin + 1
-    y_dim = ymax - ymin + 1
-    df.sort(columns=[ycol_name, xcol_name], inplace=True)
-    rgb = df[['R','G','B']].values
-    rgb = rgb.reshape((x_dim, y_dim, 3))
-    rgb = rgb.astype(np.uint8)
-    return rgb, df
-
-    
-def main():
-    A_path = 'figs/vermeer.jpg'
-    B_path = 'figs/dali.jpg'
-
-    A_obj = preprocess(A_path)
-    B_obj = preprocess(B_path)
-
-    A_obj.rearrange_pixels(B_obj)
-    B_obj.rearrange_pixels(A_obj)
-
-    an_example = Animator(A_obj.df, B_obj.df)
-    an_example.draw()
-
-
-main()
 
 
