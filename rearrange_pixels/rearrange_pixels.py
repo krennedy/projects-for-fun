@@ -29,10 +29,25 @@ def select_input_images():
 
 	return imfile_1, imfile_2
 
-def launch_animation(imfile_1, imfile_2):
-	pass
+
+def remap_pixels(target, reference):
+	""" pix is an object containing information about all the pixels
+	in their target image - where they were in the target, and where they
+	need to go in the reconstruction of the reference.
+	"""
+	pix = ()
+	return pix
+
+
+def launch_animation(pix1, pix2):
+	""" Where the Canvassing animation will actually be launched """
+	(pix1, pix2)
 
 
 if __name__ == '__main__':
+	""" Three parts: image selection. calculation of pixels. display.
+	"""
 	imfile_1, imfile_2 = select_input_images()
-	launch_animation(imfile_1, imfile_2)
+	pix1 = remap_pixels(imfile_1, imfile_2)
+	pix2 = remap_pixels(imfile_1, imfile_2)
+	launch_animation(pix1, pix2)
