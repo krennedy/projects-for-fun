@@ -5,7 +5,7 @@ Everything else is a tool.
 
 from tools.utils import check_sizes_equal, select_random_image_pair
 from pixel_tracker import PixelTracker
-from canvas_animate import *
+from canvas_animate import Animator
 
 import sys
 
