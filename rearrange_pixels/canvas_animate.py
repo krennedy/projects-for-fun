@@ -1,7 +1,8 @@
+from tools.utils import convert_to_imshow_format
+
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
-from pixel_tracker import PixelTracker
 
 #
 # Or get average color of image, and map distance to that color?
@@ -91,21 +92,4 @@ class Animator():
         img_put = img_put.reshape(img_shape)
         return img_put
 
-
-def convert_to_imshow_format(df, xcol_name, ycol_name):
-    """
-    PM what it says.
-    Takes almost no time!
-    """
-    xmin = df[xcol_name].min()
-    xmax = df[xcol_name].max()
-    ymin = df[ycol_name].min()
-    ymax = df[ycol_name].max()
-    x_dim = xmax - xmin + 1
-    y_dim = ymax - ymin + 1
-    df.sort(columns=[ycol_name, xcol_name], inplace=True)
-    rgb = df[['R','G','B']].values
-    rgb = rgb.reshape((x_dim, y_dim, 3))
-    rgb = rgb.astype(np.uint8)
-    return rgb, df
 

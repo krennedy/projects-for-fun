@@ -2,7 +2,10 @@
 """
 
 import Image
+
+import numpy as np
 from random import randint
+
 
 def check_sizes_equal(im_path_1, im_path_2):
 	""" Check sizes equal. Return True if so, False if not.
@@ -30,3 +33,19 @@ def select_random_image_pair():
 	print "I will be selecting your images now, muahaha!"
 	print "Images selected: %s and %s"%(imfile_1, imfile_2)
 	return imfile_1, imfile_2
+
+
+def convert_to_imshow_format(df, xcol_name, ycol_name):
+    """ PM what it says. Takes almost no time!
+    """
+    xmin = df[xcol_name].min()
+    xmax = df[xcol_name].max()
+    ymin = df[ycol_name].min()
+    ymax = df[ycol_name].max()
+    x_dim = xmax - xmin + 1
+    y_dim = ymax - ymin + 1
+    df.sort(columns=[ycol_name, xcol_name], inplace=True)
+    rgb = df[['R','G','B']].values
+    rgb = rgb.reshape((x_dim, y_dim, 3))
+    rgb = rgb.astype(np.uint8)
+    return rgb, df
