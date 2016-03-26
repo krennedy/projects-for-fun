@@ -5,6 +5,7 @@ import pandas as pd
 
 class ImageObj():
     """
+    FIXME: rename something like canvas?
     Some notes about this
     Can I make the returned instance just BE a dataframe
     For which I basically append on function calls not native
