@@ -5,6 +5,7 @@ Everything else is a tool.
 
 from tools.utils import check_sizes_equal, select_random_image_pair
 from pixel_tracker import PixelTracker
+from canvas_animate import *
 
 import sys
 
@@ -37,7 +38,9 @@ def exchange_pixels(imfile_1, imfile_2):
 	need to go in the reconstruction of the reference.
 	"""
 	pix1 = PixelTracker(imfile_1)
+	pix1.sort_by_fancybins()
 	pix2 = PixelTracker(imfile_2)
+	pix2.sort_by_fancybins()
 
 	pix1.rearrange_pixels(pix2)
 	pix2.rearrange_pixels(pix1)
@@ -46,8 +49,8 @@ def exchange_pixels(imfile_1, imfile_2):
 
 def launch_animation(pix1, pix2):
 	""" Where the Canvassing animation will actually be launched """
-	pass
-
+	canvas = Animator(pix1.df, pix2.df)
+	canvas.draw()
 
 if __name__ == '__main__':
 	""" Three parts: image selection. calculation of pixels. display.

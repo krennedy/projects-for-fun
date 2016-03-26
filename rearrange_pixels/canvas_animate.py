@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
-from imager import ImageObj
+from pixel_tracker import PixelTracker as ImageObj
 
 #
 # Or get average color of image, and map distance to that color?
@@ -122,8 +122,8 @@ def convert_to_imshow_format(df, xcol_name, ycol_name):
 
     
 def main():
-    A_path = 'figs/vermeer.jpg'
-    B_path = 'figs/dali.jpg'
+    A_path = 'figs/beaux.jpg'
+    B_path = 'figs/vangogh.jpg'
 
     A_obj = preprocess(A_path)
     B_obj = preprocess(B_path)
@@ -134,7 +134,7 @@ def main():
     an_example = Animator(A_obj.df, B_obj.df)
     an_example.draw()
 
-
-main()
+if __name__ == '__main__':
+    main()
 
 
