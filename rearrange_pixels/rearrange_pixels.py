@@ -4,6 +4,7 @@ Everything else is a tool.
 """
 
 from tools.utils import check_sizes_equal, select_random_image_pair
+from pixel_tracker import PixelTracker
 
 import sys
 
@@ -30,24 +31,27 @@ def select_input_images():
 	return imfile_1, imfile_2
 
 
-def remap_pixels(target, reference):
+def exchange_pixels(imfile_1, imfile_2):
 	""" pix is an object containing information about all the pixels
 	in their target image - where they were in the target, and where they
 	need to go in the reconstruction of the reference.
 	"""
-	pix = ()
-	return pix
+	pix1 = PixelTracker(imfile_1)
+	pix2 = PixelTracker(imfile_2)
+
+	pix1.rearrange_pixels(pix2)
+	pix2.rearrange_pixels(pix1)
+	return pix1, pix2
 
 
 def launch_animation(pix1, pix2):
 	""" Where the Canvassing animation will actually be launched """
-	(pix1, pix2)
+	pass
 
 
 if __name__ == '__main__':
 	""" Three parts: image selection. calculation of pixels. display.
 	"""
 	imfile_1, imfile_2 = select_input_images()
-	pix1 = remap_pixels(imfile_1, imfile_2)
-	pix2 = remap_pixels(imfile_1, imfile_2)
+	pix1, pix2 = exchange_pixels(imfile_1, imfile_2)
 	launch_animation(pix1, pix2)

@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 
 
-class ImageObj():
+class PixelTracker():
     """
-    FIXME: rename something like canvas?
     Some notes about this
     Can I make the returned instance just BE a dataframe
     For which I basically append on function calls not native
@@ -15,7 +14,7 @@ class ImageObj():
     def __init__(self, path_to_jpg):
         
         """ Testing to find the format I want for eventual 
-        analysis image_dict shoudl eventually be an image
+        analysis image_dict should eventually be an image
         But here as a dict, assuming initial processing done
         """
         
