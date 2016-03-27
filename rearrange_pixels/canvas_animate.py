@@ -95,7 +95,6 @@ class Animator():
         But using the values input from another image
         """
         initial_shape = img_put.shape
-        #new_shape = (img_shape[0]* img_shape[1], img_shape[2])
 
         img_put_flat = img_put.reshape(self.npix, 3)
         img_pull_flat = img_pull.reshape(self.npix, 3)
