@@ -14,6 +14,7 @@ def check_sizes_equal(im_path_1, im_path_2):
 	try:
 		im_1 = Image.open(im_path_1)
 		im_2 = Image.open(im_path_2)
+		print im_1.size, im_2.size
 		sizes_equal = im_1.size != im_2.size
 		return sizes_equal
 	except IOError:

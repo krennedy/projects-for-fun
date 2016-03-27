@@ -17,13 +17,21 @@ class Animator():
 
     def __init__(self):
         # im1 : the imshow at ax1
-        # rgb1: the pixel map displayed in im1
+        # map1: the rgb pixel map displayed in im1
+        # map3: same pixels as map1, but rearranged to look like pix2
         pass
 
     def load(self, pix_1, pix_2):
         """ Wow, we need a docstring!
         """
-        self.rgb_1 = convert_to_imshow_format(pix_1.RGB, pix_1.shape)
+        # Initial displays (top row), just the original images
+        rgb1 = pix_1.RGB
+        map1 = convert_to_imshow_format(rgb1, pix_1.shape)
+
+        # New displays (bottom row)
+        rgb3 = sort_rgb_into_new_order(rgb1, pix_1.xy_new)
+        map3 = convert_to_imshow_format(rgb3, pix_2.shape)
+
         #self.rgb_2 = convert_to_imshow_format(pix_2)
 
         # Initalize new canvasses as all white, in the shape of targets
@@ -32,8 +40,8 @@ class Animator():
 
         # Initialize
         kwargs = dict(animated=True, interpolation='none')
-        self.im1 = ax1.imshow(self.rgb_1, **kwargs)
-        #self.im3 = ax3.imshow(self.rgb_B_new, **kwargs)
+        self.im1 = ax1.imshow(map1, **kwargs)
+        self.im3 = ax3.imshow(map3, **kwargs)
 
         #nsteps = 10
         #self.npix = self.rgb_A.shape[0] * self.rgb_A.shape[1]
@@ -47,7 +55,7 @@ class Animator():
         plt.show()
 
     def updatefig(self, j):
-        """ Update att 4
+        """ Update att 4. Think rgb_A is now called map1.
         """
         new_1 = take_out(self.rgb_A, j, self.nstep)
         #new_2 = take_out(self.rgb_B, j, self.nstep)
@@ -100,11 +108,13 @@ def put_in(img_put, img_pull, x_new, y_new, i):
     return img_put
 
 
-def sort_rgb_into_new_order(rgb, x, y):
+def sort_rgb_into_new_order(rgb, xy):
     """ We are given an rgb array of pixels, and the xy-coord they are to be at.
-    From this, reorder rgb so it can be displayed
+    From this, reorder rgb so it can display new image
     """
-    idx_sort = np.lexsort((y, x))
+    x = xy[:, 0]
+    y = xy[:, 1]
+    idx_sort = np.lexsort((x, y))
     rgb_sorted = rgb[idx_sort]
     return rgb_sorted
 

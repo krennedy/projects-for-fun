@@ -56,7 +56,9 @@ class PixelTracker():
 
 
         # Then sort by theta_cwheel within black
-        idx_sort = np.lexsort((dist_to_black_broad, self.theta_cwheel))
+        #FIXME: you arent actually sorting by fancybins as is right now
+        #idx_sort = np.lexsort((self.theta_cwheel, dist_to_black_broad))
+        idx_sort = np.argsort(self.dist_to_black)
         self.sort_index = idx_sort
         #self.dist_to_black = self.dist_to_black[idx_sort]
         #self.theta_cwheel = self.theta_cwheel[idx_sort]
@@ -72,4 +74,10 @@ class PixelTracker():
         This assumes that self and target are both already
         ordered correctly.
         """
-        self.xy_new = target.xy
+        # First, sort for pure order
+        xy_new_sorted = target.xy[target.sort_index]
+
+        # Next, match to existing order
+        xy_new_resorted = xy_new_sorted[self.sort_index]
+
+        self.xy_new = xy_new_resorted
