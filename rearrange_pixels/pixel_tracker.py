@@ -17,7 +17,7 @@ class PixelTracker():
         """ Blah.
         """
         img = Image.open(path_to_jpg)
-        self.shape = img.size
+        self.shape = img.size[::-1]  # reverse order
 
         img_pix = np.asarray(img)
 
@@ -32,8 +32,9 @@ class PixelTracker():
         y_axis = np.arange(y_dim)
         x, y = np.meshgrid(x_axis, y_axis)
 
-        self.x = x.ravel()
-        self.y = y.ravel()
+        x = x.ravel()
+        y = y.ravel()
+        self.xy = np.column_stack((x, y))
         self.RGB = np.column_stack((R, G, B))
 
 
@@ -58,8 +59,7 @@ class PixelTracker():
         #FIXME: you arent actually sorting by fancybins as is right now
         #idx_sort = np.lexsort((self.theta_cwheel, dist_to_black_broad))
         idx_sort = np.argsort(dist_to_black)
-        self.x = self.x[idx_sort]
-        self.y = self.y[idx_sort]
+        self.xy = self.xy[idx_sort]
         self.RGB = self.RGB[idx_sort]
                 
     def rearrange_pixels(self, target):
@@ -70,6 +70,4 @@ class PixelTracker():
         This assumes that self and target are both already
         ordered correctly.
         """
-        # First, sort for pure order
-        self.x_new = target.x
-        self.y_new = target.y
+        self.xy_new = target.xy
