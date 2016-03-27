@@ -18,24 +18,24 @@ ax4 = fig.add_subplot(224)
 
 class Animator():
     
-    def __init__(self, A_df, B_df):
-        self.pix_A, self.df_A_sorted = convert_to_imshow_format(A_df, 'x', 'y')
-        self.pix_B, self.df_B_sorted = convert_to_imshow_format(B_df, 'x', 'y')
+    def __init__(self, pix_A, pix_B):
+        self.rgb_A, self.df_A_sorted = convert_to_imshow_format(pix_A)
+        self.rgb_B, self.df_B_sorted = convert_to_imshow_format(pix_B)
                 
-        self.pix_B_new = np.ones(self.pix_B.shape).astype('uint8') * 255
-        self.pix_A_new = np.ones(self.pix_A.shape).astype('uint8') * 255
-        self.pix_A_original = self.pix_A.copy()
-        self.pix_B_original = self.pix_B.copy()
+        self.rgb_B_new = np.ones(self.rgb_B.shape).astype('uint8') * 255
+        self.rgb_A_new = np.ones(self.rgb_A.shape).astype('uint8') * 255
+        self.rgb_A_original = self.rgb_A.copy()
+        self.rgb_B_original = self.rgb_B.copy()
 
         # Initialize
         kwargs = dict(animated=True, interpolation='none')
-        self.im1 = ax1.imshow(self.pix_A, **kwargs)
-        self.im2 = ax2.imshow(self.pix_B, **kwargs)
-        self.im3 = ax3.imshow(self.pix_B_new, **kwargs)
-        self.im4 = ax4.imshow(self.pix_A_new, **kwargs)
+        self.im1 = ax1.imshow(self.rgb_A, **kwargs)
+        self.im2 = ax2.imshow(self.rgb_B, **kwargs)
+        self.im3 = ax3.imshow(self.rgb_B_new, **kwargs)
+        self.im4 = ax4.imshow(self.rgb_A_new, **kwargs)
 
         nsteps = 10
-        self.npix = self.pix_A.shape[0] * self.pix_A.shape[1]
+        self.npix = self.rgb_A.shape[0] * self.rgb_A.shape[1]
         self.nstep = int(self.npix/float(nsteps))
 
     def draw(self,):
@@ -48,17 +48,17 @@ class Animator():
     def updatefig(self, j):
         """ Update att 4
         """
-        self.im1.set_array(self.take_out(self.pix_A, j))
-        self.im2.set_array(self.take_out(self.pix_B, j))
-        self.im3.set_array(self.put_in(self.pix_B_new, self.pix_A_original,
+        self.im1.set_array(self.take_out(self.rgb_A, j))
+        self.im2.set_array(self.take_out(self.rgb_B, j))
+        self.im3.set_array(self.put_in(self.rgb_B_new, self.rgb_A_original,
                                        self.df_A_sorted, j))
-        self.im4.set_array(self.put_in(self.pix_A_new, self.pix_B_original,
+        self.im4.set_array(self.put_in(self.rgb_A_new, self.rgb_B_original,
                                        self.df_B_sorted, j))
 
         # return top row to original state if at end of animation
         if j+self.nstep >= len(self.df_A_sorted):
-            self.im1.set_array(self.pix_A_original)
-            self.im2.set_array(self.pix_B_original)
+            self.im1.set_array(self.rgb_A_original)
+            self.im2.set_array(self.rgb_B_original)
 
     def take_out(self,img, i):
         img_shape = img.shape

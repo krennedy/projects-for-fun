@@ -31,7 +31,6 @@ def select_input_images():
 
 	return imfile_1, imfile_2
 
-
 def exchange_pixels(imfile_1, imfile_2):
 	""" pix is an object containing information about all the pixels
 	in their target image - where they were in the target, and where they
@@ -49,7 +48,7 @@ def exchange_pixels(imfile_1, imfile_2):
 
 def launch_animation(pix1, pix2):
 	""" Where the Canvassing animation will actually be launched """
-	canvas = Animator(pix1.df, pix2.df)
+	canvas = Animator(pix1, pix2)
 	canvas.draw()
 
 if __name__ == '__main__':
