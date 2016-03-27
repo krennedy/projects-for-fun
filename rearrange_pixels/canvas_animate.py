@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 
 # GLOBALS
 FIG = plt.figure(figsize=(14,10)) # Define out fig
-SAVE_SNAPS = True
+SAVE_SNAPS = False
 NSTEPS = 10 # How many timesteps to use in animation
 
 class Animator():
@@ -68,11 +68,13 @@ class Animator():
         self.initialize_canvas()
         ani = animation.FuncAnimation(
             FIG, self.updatefig,
-            np.arange(0, self.npix, self.nstep),
+            #np.arange(0, self.npix, self.nstep),
+            np.arange(0, NSTEPS),
             interval=100, blit=False, repeat=False)
         plt.show()
 
     def updatefig(self, j):
+        print j
         """ Update all 4. Think rgb_A is now called map1.
         """
         self.take_out(self.map1, self.pixA, j)
@@ -86,7 +88,7 @@ class Animator():
         self.im4.set_array(self.map4)
 
         # return top row to original state if at end of animation
-        if j+self.nstep >= self.npix:
+        if j >= NSTEPS - 1:
             self.im1.set_array(self.ref1)
             self.im2.set_array(self.ref2)
 
@@ -97,7 +99,9 @@ class Animator():
     def take_out(self, img, pix, j):
         initial_shape = img.shape
         img_flat = img.reshape(self.npix, 3)
-        img_flat[j: j + self.nstep] = np.array([155, 155, 155]).astype('uint8')
+        start_idx = j * self.nstep
+        stop_idx = start_idx + self.nstep
+        img_flat[start_idx:stop_idx] = np.array([155, 155, 155]).astype('uint8')
         img = img_flat.reshape(initial_shape)
         return img
 
@@ -122,9 +126,11 @@ class Animator():
         x_dim = img_put.shape[1]
 
         positions = y_new_sorted * x_dim + x_new_sorted
-        positions_this_time = positions[j: j+self.nstep]
+        start_idx = j*self.nstep
+        stop_idx = start_idx + self.nstep
+        positions_this_time = positions[start_idx: stop_idx]
 
-        img_put_flat[positions_this_time] = img_pull_flat[j: j+self.nstep]
+        img_put_flat[positions_this_time] = img_pull_flat[start_idx: stop_idx]
         img_put = img_put_flat.reshape(initial_shape)
         return img_put
 
