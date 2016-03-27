@@ -92,7 +92,7 @@ class Animator():
             self.im2.set_array(self.ref2)
 
         if SAVE_SNAPS == True:
-            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=40)
+            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=20)
 
 
     def take_out(self, img, pix, j):
