@@ -14,7 +14,9 @@ def check_sizes_equal(im_path_1, im_path_2):
 	try:
 		im_1 = Image.open(im_path_1)
 		im_2 = Image.open(im_path_2)
-		sizes_equal = im_1.size != im_2.size
+		area_1 = im_1.size[0] * im_1.size[1]
+		area_2 = im_2.size[0] * im_2.size[1]
+		sizes_equal = area_1 == area_2
 		return sizes_equal
 	except IOError:
 		print 'Problems opening file - were these even images?'
