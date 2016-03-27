@@ -27,18 +27,19 @@ class PixelTracker():
         G = img_pix[:,:,1].ravel().astype(int)
         B = img_pix[:,:,2].ravel().astype(int)
 
-        x_dim = img_pix.shape[0]
-        y_dim = img_pix.shape[1]
+        x_dim = img_pix.shape[1]
+        y_dim = img_pix.shape[0]
 
         x_axis = np.arange(x_dim)
         y_axis = np.arange(y_dim)
         x, y = np.meshgrid(x_axis, y_axis)
 
-        x = x.ravel()
-        y = y.ravel()
-
-        self.xy = np.column_stack((x, y))
+        self.x = x.ravel()
+        self.y = y.ravel()
         self.RGB = np.column_stack((R, G, B))
+
+        # FIXME: the below are not part of init, right? sort_by_fancybins
+        # FIXME: and probably shouldnt be attributes, but on-the-fly variables
         self.dist_to_black = R + G + B
         self.theta_cwheel = find_theta_colorwheel(R, G, B)
 
@@ -59,12 +60,9 @@ class PixelTracker():
         #FIXME: you arent actually sorting by fancybins as is right now
         #idx_sort = np.lexsort((self.theta_cwheel, dist_to_black_broad))
         idx_sort = np.argsort(self.dist_to_black)
-        self.sort_index = idx_sort
-        #self.dist_to_black = self.dist_to_black[idx_sort]
-        #self.theta_cwheel = self.theta_cwheel[idx_sort]
-        #self.RGB = self.RGB[idx_sort]
-        #self.xy = self.xy[idx_sort]
-
+        self.x = self.x[idx_sort]
+        self.y = self.y[idx_sort]
+        self.RGB = self.RGB[idx_sort]
                 
     def rearrange_pixels(self, target):
         """
@@ -75,9 +73,5 @@ class PixelTracker():
         ordered correctly.
         """
         # First, sort for pure order
-        xy_new_sorted = target.xy[target.sort_index]
-
-        # Next, match to existing order
-        xy_new_resorted = xy_new_sorted[self.sort_index]
-
-        self.xy_new = xy_new_resorted
+        self.x_new = target.x
+        self.y_new = target.y

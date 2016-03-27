@@ -21,16 +21,17 @@ class Animator():
         # map3: same pixels as map1, but rearranged to look like pix2
         pass
 
-    def load(self, pix_1, pix_2):
+    def load(self, pix1, pix2):
         """ Wow, we need a docstring!
         """
         # Initial displays (top row), just the original images
-        rgb1 = pix_1.RGB
-        map1 = convert_to_imshow_format(rgb1, pix_1.shape)
+        rgb1 = pix1.RGB
+        rgb1_test = sort_rgb_into_new_order(rgb1, pix1.x, pix1.y)
+        map1 = convert_to_imshow_format(rgb1_test, pix1.shape)
 
         # New displays (bottom row)
-        rgb3 = sort_rgb_into_new_order(rgb1, pix_1.xy_new)
-        map3 = convert_to_imshow_format(rgb3, pix_2.shape)
+        rgb3 = sort_rgb_into_new_order(rgb1, pix1.x_new, pix1.y_new)
+        map3 = convert_to_imshow_format(rgb3, pix2.shape)
 
         #self.rgb_2 = convert_to_imshow_format(pix_2)
 
@@ -108,12 +109,12 @@ def put_in(img_put, img_pull, x_new, y_new, i):
     return img_put
 
 
-def sort_rgb_into_new_order(rgb, xy):
+def sort_rgb_into_new_order(rgb, x, y):
     """ We are given an rgb array of pixels, and the xy-coord they are to be at.
     From this, reorder rgb so it can display new image
     """
-    x = xy[:, 0]
-    y = xy[:, 1]
+    #x = xy[:, 0]
+    #y = xy[:, 1]
     idx_sort = np.lexsort((x, y))
     rgb_sorted = rgb[idx_sort]
     return rgb_sorted
