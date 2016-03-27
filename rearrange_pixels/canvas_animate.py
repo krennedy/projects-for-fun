@@ -2,15 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
 
-#
-# Or get average color of image, and map distance to that color?
-# Identify bottlenecks
-# Convert whole thing to enhanced dataframe object?
-# Handle different sized inputs
 
-fig = plt.figure(figsize=(14,10))
-ax1 = fig.add_subplot(221)
-ax3 = fig.add_subplot(223)
+# GLOBALS
+
+# Figure requirements
+FIG = plt.figure(figsize=(14,10))
+AX1 = FIG.add_subplot(221)
+AX2 = FIG.add_subplot(222)
+AX3 = FIG.add_subplot(223)
+AX4 = FIG.add_subplot(224)
+
+# How many timesteps to use in animation
+NSTEPS = 10
 
 class Animator():
 
@@ -28,38 +31,39 @@ class Animator():
         rgb1 = sort_rgb_into_image_order(pixA.RGB, pixA.xy)
         map1 = convert_to_imshow_format(rgb1, pixA.shape)
 
+        rgb2 = sort_rgb_into_image_order(pixB.RGB, pixB.xy)
+        map2 = convert_to_imshow_format(rgb2, pixB.shape)
+
         # New displays (bottom row) START WHITE
         map3 = make_white_image(pixB.shape)
-        #rgb3 = sort_rgb_into_image_order(pixA.RGB, pixA.xy_new)
-        #map3 = convert_to_imshow_format(rgb3, pixB.shape)
-
-        # Initalize new canvasses as all white, in the shape of targets
-        #self.rgb_B_new = np.ones(self.rgb_B.shape).astype('uint8') * 255
-        #self.rgb_A_new = np.ones(self.rgb_A.shape).astype('uint8') * 255
+        map4 = make_white_image(pixA.shape)
 
         # Initialize
         kwargs = dict(animated=True, interpolation='none')
-        self.im1 = ax1.imshow(map1, **kwargs)
-        self.im3 = ax3.imshow(map3, **kwargs)
+        self.im1 = AX1.imshow(map1, **kwargs)
+        self.im2 = AX2.imshow(map2, **kwargs)
+        self.im3 = AX3.imshow(map3, **kwargs)
+        self.im4 = AX4.imshow(map4, **kwargs)  # Extra attributes we'll need later, urgh
 
+        self.pixA = pixA   # Blaaaaahhhhh
+        self.pixB = pixB   # Blaaahhhhhhh
 
-        # Extra attributes we'll need later, urgh
-        #nsteps = 10
-        self.npix = pixA.shape[0] * pixA.shape[1] # I dont like this here, could get from map1
-        self.pixA = pixA # Blaaaaahhhhh
-        #self.nstep = int(self.npix/float(nsteps))
+        self.npix = map1.shape[0] * map1.shape[1]
+        self.nstep = int(self.npix / float(NSTEPS))  # number PER step
+
         self.map1 = map1
+        self.map2 = map2
         self.map3 = map3
-        self.ref1 = map1.copy() # The maps will get depleted as you go.
+        self.map4 = map4
+
+        # The original maps will get modified as you go, so keep a reference
+        self.ref1 = map1.copy()
+        self.ref2 = map2.copy()
 
     def draw(self,):
-        nsteps = 10
-        nstep = int(self.npix / float(nsteps))  # number PER step
-        self.nstep = nstep # ugh fine
-
         ani = animation.FuncAnimation(
-            fig, self.updatefig,
-            np.arange(0, self.npix, nstep),
+            FIG, self.updatefig,
+            np.arange(0, self.npix, self.nstep),
             interval=100, blit=False, repeat=False)
         plt.show()
 
@@ -67,19 +71,18 @@ class Animator():
         """ Update all 4. Think rgb_A is now called map1.
         """
         self.take_out(self.map1, self.pixA, j)
-        #new_2 = take_out(self.rgb_B, j, self.nstep)
+        self.take_out(self.map2, self.pixB, j)
         self.put_in(self.ref1, self.map3, self.pixA, j)
-        #new_4 = put_in(self.rgb_A_new, self.rgb_B_original,
-        #               self.df_B_sorted, j)
+        self.put_in(self.ref2, self.map4, self.pixB, j)
         self.im1.set_array(self.map1)
-        #self.im2.set_array(new_2)
+        self.im2.set_array(self.map2)
         self.im3.set_array(self.map3)
-        #self.im4.set_array(new_4)
+        self.im4.set_array(self.map4)
 
         # return top row to original state if at end of animation
-        #if j+self.nstep >= len(self.df_A_sorted):
-        #    self.im1.set_array(self.rgb_A_original)
-        #    self.im2.set_array(self.rgb_B_original)
+        if j+self.nstep >= self.npix:
+            self.im1.set_array(self.ref1)
+            self.im2.set_array(self.ref2)
 
 
     def take_out(self, img, pix, j):
@@ -90,7 +93,7 @@ class Animator():
         return img
 
 
-    def put_in(self, img_pull, img_put, pix, i):
+    def put_in(self, img_pull, img_put, pix, j):
         """ Here, you want to put in a few pixels of new image
         But using the values input from another image
         """
@@ -110,9 +113,9 @@ class Animator():
         x_dim = img_put.shape[1]
 
         positions = y_new_sorted * x_dim + x_new_sorted
-        positions_this_time = positions[i:i+self.nstep]
+        positions_this_time = positions[j: j+self.nstep]
 
-        img_put_flat[positions_this_time] = img_pull_flat[i:i+self.nstep]
+        img_put_flat[positions_this_time] = img_pull_flat[j: j+self.nstep]
         img_put = img_put_flat.reshape(initial_shape)
         return img_put
 
