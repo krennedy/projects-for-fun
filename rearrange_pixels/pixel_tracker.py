@@ -14,9 +14,7 @@ class PixelTracker():
 
     def __init__(self, path_to_jpg):
         
-        """ Testing to find the format I want for eventual 
-        analysis image_dict should eventually be an image
-        But here as a dict, assuming initial processing done
+        """ Blah.
         """
         img = Image.open(path_to_jpg)
         self.shape = img.size
