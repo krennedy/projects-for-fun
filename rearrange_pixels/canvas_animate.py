@@ -4,12 +4,9 @@ import matplotlib.animation as animation
 
 
 # GLOBALS
-
-# Figure requirements
-FIG = plt.figure(figsize=(14,10))
-
-# How many timesteps to use in animation
-NSTEPS = 10
+FIG = plt.figure(figsize=(14,10)) # Define out fig
+SAVE_SNAPS = True
+NSTEPS = 10 # How many timesteps to use in animation
 
 class Animator():
 
@@ -23,6 +20,9 @@ class Animator():
     def load(self, pixA, pixB):
         """ Wow, we need a docstring!
         """
+        self.pixA = pixA  # Blaaaaahhhhh
+        self.pixB = pixB  # Blaaahhhhhhh
+
         # Initial displays (top row), just the original images
         rgb1 = sort_rgb_into_image_order(pixA.RGB, pixA.xy)
         self.map1 = convert_to_imshow_format(rgb1, pixA.shape)
@@ -34,16 +34,12 @@ class Animator():
         self.map3 = make_white_image(pixB.shape)
         self.map4 = make_white_image(pixA.shape)
 
-        self.pixA = pixA   # Blaaaaahhhhh
-        self.pixB = pixB   # Blaaahhhhhhh
-
         self.npix = self.map1.shape[0] * self.map1.shape[1]
         self.nstep = int(self.npix / float(NSTEPS))  # number PER step
 
         # The original maps will get modified as you go, so keep a reference
         self.ref1 = self.map1.copy()
         self.ref2 = self.map2.copy()
-
 
     def initialize_canvas(self):
         kwargs = dict(animated=True, interpolation='none')
@@ -83,6 +79,7 @@ class Animator():
         self.take_out(self.map2, self.pixB, j)
         self.put_in(self.ref1, self.map3, self.pixA, j)
         self.put_in(self.ref2, self.map4, self.pixB, j)
+
         self.im1.set_array(self.map1)
         self.im2.set_array(self.map2)
         self.im3.set_array(self.map3)
@@ -92,6 +89,9 @@ class Animator():
         if j+self.nstep >= self.npix:
             self.im1.set_array(self.ref1)
             self.im2.set_array(self.ref2)
+
+        if SAVE_SNAPS == True:
+            plt.savefig('saved_snaps/ex_%s.png'%j)
 
 
     def take_out(self, img, pix, j):
