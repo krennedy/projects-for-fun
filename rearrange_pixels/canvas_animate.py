@@ -4,16 +4,9 @@ import matplotlib.animation as animation
 
 
 # GLOBALS
-
-# Figure requirements
-FIG = plt.figure(figsize=(14,10))
-AX1 = FIG.add_subplot(221)
-AX2 = FIG.add_subplot(222)
-AX3 = FIG.add_subplot(223)
-AX4 = FIG.add_subplot(224)
-
-# How many timesteps to use in animation
-NSTEPS = 10
+FIG = plt.figure(figsize=(14,10)) # Define out fig
+SAVE_SNAPS = True
+NSTEPS = 25 # How many timesteps to use in animation
 
 class Animator():
 
@@ -27,68 +20,87 @@ class Animator():
     def load(self, pixA, pixB):
         """ Wow, we need a docstring!
         """
+        self.pixA = pixA  # Blaaaaahhhhh
+        self.pixB = pixB  # Blaaahhhhhhh
+
         # Initial displays (top row), just the original images
         rgb1 = sort_rgb_into_image_order(pixA.RGB, pixA.xy)
-        map1 = convert_to_imshow_format(rgb1, pixA.shape)
+        self.map1 = convert_to_imshow_format(rgb1, pixA.shape)
 
         rgb2 = sort_rgb_into_image_order(pixB.RGB, pixB.xy)
-        map2 = convert_to_imshow_format(rgb2, pixB.shape)
+        self.map2 = convert_to_imshow_format(rgb2, pixB.shape)
 
         # New displays (bottom row) START WHITE
-        map3 = make_white_image(pixB.shape)
-        map4 = make_white_image(pixA.shape)
+        self.map3 = make_white_image(pixB.shape)
+        self.map4 = make_white_image(pixA.shape)
 
-        # Initialize
-        kwargs = dict(animated=True, interpolation='none')
-        self.im1 = AX1.imshow(map1, **kwargs)
-        self.im2 = AX2.imshow(map2, **kwargs)
-        self.im3 = AX3.imshow(map3, **kwargs)
-        self.im4 = AX4.imshow(map4, **kwargs)  # Extra attributes we'll need later, urgh
-
-        self.pixA = pixA   # Blaaaaahhhhh
-        self.pixB = pixB   # Blaaahhhhhhh
-
-        self.npix = map1.shape[0] * map1.shape[1]
+        self.npix = self.map1.shape[0] * self.map1.shape[1]
         self.nstep = int(self.npix / float(NSTEPS))  # number PER step
 
-        self.map1 = map1
-        self.map2 = map2
-        self.map3 = map3
-        self.map4 = map4
-
         # The original maps will get modified as you go, so keep a reference
-        self.ref1 = map1.copy()
-        self.ref2 = map2.copy()
+        self.ref1 = self.map1.copy()
+        self.ref2 = self.map2.copy()
+
+    def initialize_canvas(self):
+        kwargs = dict(animated=True, interpolation='none')
+
+        ax1 = FIG.add_subplot(221)
+        self.im1 = ax1.imshow(self.ref1, **kwargs)
+        plt.title('Image 1')
+        plt.axis('off')
+
+        ax2 = FIG.add_subplot(222)
+        self.im2 = ax2.imshow(self.ref2, **kwargs)
+        plt.title('Image 2')
+        plt.axis('off')
+
+        ax3 = FIG.add_subplot(223)
+        self.im3 = ax3.imshow(self.map3, **kwargs)
+        plt.title('Image 1 Rearranged')
+        plt.axis('off')
+
+        ax4 = FIG.add_subplot(224)
+        self.im4 = ax4.imshow(self.map4, **kwargs)
+        plt.title('Image 2 Rearranged')
+        plt.axis('off')
 
     def draw(self,):
-        ani = animation.FuncAnimation(
+        self.initialize_canvas()
+        draw_me = animation.FuncAnimation(
             FIG, self.updatefig,
-            np.arange(0, self.npix, self.nstep),
-            interval=100, blit=False, repeat=False)
+            np.arange(0, NSTEPS),
+            interval=1, blit=False, repeat=False)
         plt.show()
 
     def updatefig(self, j):
+        print j
         """ Update all 4. Think rgb_A is now called map1.
         """
         self.take_out(self.map1, self.pixA, j)
         self.take_out(self.map2, self.pixB, j)
         self.put_in(self.ref1, self.map3, self.pixA, j)
         self.put_in(self.ref2, self.map4, self.pixB, j)
+
         self.im1.set_array(self.map1)
         self.im2.set_array(self.map2)
         self.im3.set_array(self.map3)
         self.im4.set_array(self.map4)
 
         # return top row to original state if at end of animation
-        if j+self.nstep >= self.npix:
+        if j >= NSTEPS - 1:
             self.im1.set_array(self.ref1)
             self.im2.set_array(self.ref2)
+
+        if SAVE_SNAPS == True:
+            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=20)
 
 
     def take_out(self, img, pix, j):
         initial_shape = img.shape
         img_flat = img.reshape(self.npix, 3)
-        img_flat[j: j + self.nstep] = np.array([155, 155, 155]).astype('uint8')
+        start_idx = j * self.nstep
+        stop_idx = start_idx + self.nstep
+        img_flat[start_idx:stop_idx] = np.array([155, 155, 155]).astype('uint8')
         img = img_flat.reshape(initial_shape)
         return img
 
@@ -113,9 +125,11 @@ class Animator():
         x_dim = img_put.shape[1]
 
         positions = y_new_sorted * x_dim + x_new_sorted
-        positions_this_time = positions[j: j+self.nstep]
+        start_idx = j*self.nstep
+        stop_idx = start_idx + self.nstep
+        positions_this_time = positions[start_idx: stop_idx]
 
-        img_put_flat[positions_this_time] = img_pull_flat[j: j+self.nstep]
+        img_put_flat[positions_this_time] = img_pull_flat[start_idx: stop_idx]
         img_put = img_put_flat.reshape(initial_shape)
         return img_put
 
