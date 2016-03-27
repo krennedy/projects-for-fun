@@ -48,7 +48,8 @@ def exchange_pixels(imfile_1, imfile_2):
 
 def launch_animation(pix1, pix2):
 	""" Where the Canvassing animation will actually be launched """
-	canvas = Animator(pix1, pix2)
+	canvas = Animator()
+	canvas.load(pix1, pix2)
 	canvas.draw()
 
 if __name__ == '__main__':

@@ -69,18 +69,3 @@ def find_theta_colorwheel(R, G, B):
 	return theta_cwheel
 
 
-def convert_to_imshow_format(pix):
-	""" PM what it says. Takes almost no time!
-    """
-	x = pix.xy[:, 0]
-	y = pix.xy[:, 1]
-	xmin, xmax = x.min(), x.max()
-	ymin, ymax = y.min(), y.max()
-	x_dim = xmax - xmin + 1
-	y_dim = ymax - ymin + 1
-	#df.sort(columns=[ycol_name, xcol_name], inplace=True)
-	rgb = pix.RGB.reshape((x_dim, y_dim, 3))
-	rgb = rgb.astype(np.uint8)
-	return rgb, 0
-
-

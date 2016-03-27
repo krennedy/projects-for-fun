@@ -19,6 +19,8 @@ class PixelTracker():
         But here as a dict, assuming initial processing done
         """
         img = Image.open(path_to_jpg)
+        self.shape = img.size
+
         img_pix = np.asarray(img)
 
         R = img_pix[:,:,0].ravel().astype(int)
@@ -55,10 +57,11 @@ class PixelTracker():
 
         # Then sort by theta_cwheel within black
         idx_sort = np.lexsort((dist_to_black_broad, self.theta_cwheel))
-        self.dist_to_black = self.dist_to_black[idx_sort]
-        self.theta_cwheel = self.theta_cwheel[idx_sort]
-        self.RGB = self.RGB[idx_sort]
-        self.xy = self.xy[idx_sort]
+        self.sort_index = idx_sort
+        #self.dist_to_black = self.dist_to_black[idx_sort]
+        #self.theta_cwheel = self.theta_cwheel[idx_sort]
+        #self.RGB = self.RGB[idx_sort]
+        #self.xy = self.xy[idx_sort]
 
                 
     def rearrange_pixels(self, target):
