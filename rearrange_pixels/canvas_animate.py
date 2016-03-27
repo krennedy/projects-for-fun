@@ -7,10 +7,6 @@ import matplotlib.animation as animation
 
 # Figure requirements
 FIG = plt.figure(figsize=(14,10))
-AX1 = FIG.add_subplot(221)
-AX2 = FIG.add_subplot(222)
-AX3 = FIG.add_subplot(223)
-AX4 = FIG.add_subplot(224)
 
 # How many timesteps to use in animation
 NSTEPS = 10
@@ -29,38 +25,51 @@ class Animator():
         """
         # Initial displays (top row), just the original images
         rgb1 = sort_rgb_into_image_order(pixA.RGB, pixA.xy)
-        map1 = convert_to_imshow_format(rgb1, pixA.shape)
+        self.map1 = convert_to_imshow_format(rgb1, pixA.shape)
 
         rgb2 = sort_rgb_into_image_order(pixB.RGB, pixB.xy)
-        map2 = convert_to_imshow_format(rgb2, pixB.shape)
+        self.map2 = convert_to_imshow_format(rgb2, pixB.shape)
 
         # New displays (bottom row) START WHITE
-        map3 = make_white_image(pixB.shape)
-        map4 = make_white_image(pixA.shape)
-
-        # Initialize
-        kwargs = dict(animated=True, interpolation='none')
-        self.im1 = AX1.imshow(map1, **kwargs)
-        self.im2 = AX2.imshow(map2, **kwargs)
-        self.im3 = AX3.imshow(map3, **kwargs)
-        self.im4 = AX4.imshow(map4, **kwargs)  # Extra attributes we'll need later, urgh
+        self.map3 = make_white_image(pixB.shape)
+        self.map4 = make_white_image(pixA.shape)
 
         self.pixA = pixA   # Blaaaaahhhhh
         self.pixB = pixB   # Blaaahhhhhhh
 
-        self.npix = map1.shape[0] * map1.shape[1]
+        self.npix = self.map1.shape[0] * self.map1.shape[1]
         self.nstep = int(self.npix / float(NSTEPS))  # number PER step
 
-        self.map1 = map1
-        self.map2 = map2
-        self.map3 = map3
-        self.map4 = map4
-
         # The original maps will get modified as you go, so keep a reference
-        self.ref1 = map1.copy()
-        self.ref2 = map2.copy()
+        self.ref1 = self.map1.copy()
+        self.ref2 = self.map2.copy()
+
+
+    def initialize_canvas(self):
+        kwargs = dict(animated=True, interpolation='none')
+
+        ax1 = FIG.add_subplot(221)
+        self.im1 = ax1.imshow(self.ref1, **kwargs)
+        plt.title('Image 1')
+        plt.axis('off')
+
+        ax2 = FIG.add_subplot(222)
+        self.im2 = ax2.imshow(self.ref2, **kwargs)
+        plt.title('Image 2')
+        plt.axis('off')
+
+        ax3 = FIG.add_subplot(223)
+        self.im3 = ax3.imshow(self.map3, **kwargs)
+        plt.title('Image 1 Rearranged')
+        plt.axis('off')
+
+        ax4 = FIG.add_subplot(224)
+        self.im4 = ax4.imshow(self.map4, **kwargs)
+        plt.title('Image 2 Rearranged')
+        plt.axis('off')
 
     def draw(self,):
+        self.initialize_canvas()
         ani = animation.FuncAnimation(
             FIG, self.updatefig,
             np.arange(0, self.npix, self.nstep),

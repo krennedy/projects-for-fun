@@ -43,25 +43,26 @@ class PixelTracker():
         Then sort by theta within those bins
         FIXME: how much of this hard sorting is actually necessary?
         """
-        # FIXME: the below are not part of init, right? sort_by_fancybins
-        # FIXME: and probably shouldnt be attributes, but on-the-fly variables
         dist_to_black = np.sum(self.RGB, axis=1)
-        #theta_cwheel = find_theta_colorwheel(R, G, B)
+        theta_cwheel = find_theta_colorwheel(self.RGB)
 
+        # Sort once based on distance to black
+        idx_sort = np.argsort(dist_to_black)
+        self.xy = self.xy[idx_sort]
+        self.RGB = self.RGB[idx_sort]
+
+        # Coarse grain array into percentiles of blackness
         npix = len(dist_to_black)
         arr = np.arange(npix)
         nbins = 20
         n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
         dist_to_black_broad = arr/n_per_chunk
 
-
         # Then sort by theta_cwheel within black
-        #FIXME: you arent actually sorting by fancybins as is right now
-        #idx_sort = np.lexsort((self.theta_cwheel, dist_to_black_broad))
-        idx_sort = np.argsort(dist_to_black)
+        idx_sort = np.lexsort((theta_cwheel, dist_to_black_broad))
         self.xy = self.xy[idx_sort]
         self.RGB = self.RGB[idx_sort]
-                
+
     def rearrange_pixels(self, target):
         """
         Here, target is the target image. 
