@@ -79,7 +79,7 @@ def convert_to_imshow_format(pix):
 	x_dim = xmax - xmin + 1
 	y_dim = ymax - ymin + 1
 	#df.sort(columns=[ycol_name, xcol_name], inplace=True)
-	rgb = pix.rgb.reshape((x_dim, y_dim, 3))
+	rgb = pix.RGB.reshape((x_dim, y_dim, 3))
 	rgb = rgb.astype(np.uint8)
 	return rgb, 0
 
