@@ -38,17 +38,19 @@ class PixelTracker():
         self.y = y.ravel()
         self.RGB = np.column_stack((R, G, B))
 
-        # FIXME: the below are not part of init, right? sort_by_fancybins
-        # FIXME: and probably shouldnt be attributes, but on-the-fly variables
-        self.dist_to_black = R + G + B
-        self.theta_cwheel = find_theta_colorwheel(R, G, B)
-
 
     def sort_by_fancybins(self,):
         """ Bin by darkness into N bins
         Then sort by theta within those bins
         FIXME: how much of this hard sorting is actually necessary?
         """
+        # FIXME: the below are not part of init, right? sort_by_fancybins
+        # FIXME: and probably shouldnt be attributes, but on-the-fly variables
+        dist_to_black = np.sum(self.RGB, axis=0)
+        print dist_to_black
+        stop
+        self.theta_cwheel = find_theta_colorwheel(R, G, B)
+
         npix = len(self.dist_to_black)
         arr = np.arange(npix)
         nbins = 20
