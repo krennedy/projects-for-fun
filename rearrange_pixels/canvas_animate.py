@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 
 # GLOBALS
 FIG = plt.figure(figsize=(14,10)) # Define out fig
-SAVE_SNAPS = True
+SAVE_SNAPS = False
 NSTEPS = 25 # How many timesteps to use in animation
 
 class Animator():
