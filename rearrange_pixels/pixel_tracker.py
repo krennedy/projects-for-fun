@@ -46,12 +46,10 @@ class PixelTracker():
         """
         # FIXME: the below are not part of init, right? sort_by_fancybins
         # FIXME: and probably shouldnt be attributes, but on-the-fly variables
-        dist_to_black = np.sum(self.RGB, axis=0)
-        print dist_to_black
-        stop
-        self.theta_cwheel = find_theta_colorwheel(R, G, B)
+        dist_to_black = np.sum(self.RGB, axis=1)
+        #theta_cwheel = find_theta_colorwheel(R, G, B)
 
-        npix = len(self.dist_to_black)
+        npix = len(dist_to_black)
         arr = np.arange(npix)
         nbins = 20
         n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
@@ -61,7 +59,7 @@ class PixelTracker():
         # Then sort by theta_cwheel within black
         #FIXME: you arent actually sorting by fancybins as is right now
         #idx_sort = np.lexsort((self.theta_cwheel, dist_to_black_broad))
-        idx_sort = np.argsort(self.dist_to_black)
+        idx_sort = np.argsort(dist_to_black)
         self.x = self.x[idx_sort]
         self.y = self.y[idx_sort]
         self.RGB = self.RGB[idx_sort]
