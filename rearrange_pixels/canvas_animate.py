@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 # GLOBALS
 FIG = plt.figure(figsize=(14,10)) # Define out fig
 SAVE_SNAPS = False
-NSTEPS = 10 # How many timesteps to use in animation
+NSTEPS = 50 # How many timesteps to use in animation
 
 class Animator():
 
@@ -66,11 +66,10 @@ class Animator():
 
     def draw(self,):
         self.initialize_canvas()
-        ani = animation.FuncAnimation(
+        draw_me = animation.FuncAnimation(
             FIG, self.updatefig,
-            #np.arange(0, self.npix, self.nstep),
             np.arange(0, NSTEPS),
-            interval=100, blit=False, repeat=False)
+            interval=1, blit=False, repeat=False)
         plt.show()
 
     def updatefig(self, j):
