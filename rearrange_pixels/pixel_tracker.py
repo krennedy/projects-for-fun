@@ -43,23 +43,19 @@ class PixelTracker():
         Then sort by theta within those bins
         FIXME: how much of this hard sorting is actually necessary?
         """
-        dist_to_black = np.sum(self.RGB, axis=1)
         theta_cwheel = find_theta_colorwheel(self.RGB)
+        dist_to_black = np.sum(self.RGB, axis=1)
 
-        # Sort once based on distance to black
-        idx_sort = np.argsort(dist_to_black)
-        self.xy = self.xy[idx_sort]
-        self.RGB = self.RGB[idx_sort]
-
-        # Coarse grain array into percentiles of blackness
-        npix = len(dist_to_black)
-        arr = np.arange(npix)
+        # Coarse grain distance to black
         nbins = 20
-        n_per_chunk = npix/nbins + 1  # +1 fudge factor for rounding
-        dist_to_black_broad = arr/n_per_chunk
+        darkest = min(dist_to_black)
+        lightest = max(dist_to_black)
+        binsize = (lightest - darkest) / float(nbins)
+        dist_to_black_broad = np.round(dist_to_black/ binsize)
 
         # Then sort by theta_cwheel within black
         idx_sort = np.lexsort((theta_cwheel, dist_to_black_broad))
+
         self.xy = self.xy[idx_sort]
         self.RGB = self.RGB[idx_sort]
 
