@@ -92,11 +92,12 @@ class PixelTracker():
 
     def rearrange_pixels(self, target):
         """
-        Here, target is the target image. 
-        We map our current pixels (reference image) onto the
-        target coordinates.
-        This assumes that self and target are both already
-        ordered correctly.
+        This method should be called after sorting the pixels of our
+        original input image. The new 'target' input is another
+        PixelTracker instance, which should also have already been
+        pre-sorted in the same way. Since they have both been sorted
+        with the same algorithm, we 'line them up' to find where
+        each pixel of the original image will get rearranged to.
         """
         self.xy_new = target.xy
 
