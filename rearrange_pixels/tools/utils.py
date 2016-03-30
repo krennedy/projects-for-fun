@@ -67,10 +67,11 @@ def find_theta_colorwheel(rgb):
     color_diff[mask_least_G] = br[mask_least_G]
     color_diff[mask_least_B] = rg[mask_least_B]
 
-    percent_color = color_diff / 255. # values from 0 to 1
-    delta_theta = np.arccos(percent_color)
+    percent_color = color_diff / (255.) # values sposed to be -1 to 1
 
-    theta_cwheel = delta_theta + theta_offset
+    delta_theta = percent_color * (np.pi / 3.0)  # div by 3 since constrained to 1/3rd of wheel
+    theta_cwheel = theta_offset - delta_theta
+
     return theta_cwheel
 
 
