@@ -127,17 +127,18 @@ def find_theta_colorwheel(rgb):
     difference between the two dominant colors to finer-tune where
     exactly on the wheel we should end up.
     """
-    # Find which of R/G/B had the least contribution to overall color
+    # Find which of R/G/B had the least contribution to overall color.
     which_least = np.argmin(rgb, axis=1)
 
-    # Based least-dominant color, figure out which 1/3rd of colorwheel to start on
+    # Based on least-dominant color, which third of colorwheel to start on?
     theta_offset = which_least * (2 * np.pi / 3.)
 
-    # Find the color differences
+    # Find the color differences between all pairs of colors.
     rg = rgb[:, 0] - rgb[:, 1]
     gb = rgb[:, 1] - rgb[:, 2]
     br = rgb[:, 2] - rgb[:, 0]
 
+    # Fill in color_diff with the differences between two dominant colors.
     mask_least_r = which_least == 0
     mask_least_g = which_least == 1
     mask_least_b = which_least == 2
@@ -147,10 +148,13 @@ def find_theta_colorwheel(rgb):
     color_diff[mask_least_g] = br[mask_least_g]
     color_diff[mask_least_b] = rg[mask_least_b]
 
-    percent_color = color_diff / (255.) # values sposed to be -1 to 1
+    # color_diff can range -255 to 255. Normalize from -1 to 1.
+    percent_color = color_diff / (255.)
 
-    delta_theta = percent_color * (np.pi / 3.0)  # div by 3 since constrained to 1/3rd of wheel
+    # delta_theta correction of up to one-sixth in either direction.
+    delta_theta = percent_color * (np.pi / 3.0)
+
+    # Add original offset to correction to get colorwheel angle.
     theta_cwheel = theta_offset - delta_theta
-
     return theta_cwheel
 
