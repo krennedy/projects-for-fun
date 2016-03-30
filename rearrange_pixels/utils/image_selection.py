@@ -7,8 +7,9 @@ from random import shuffle
 
 
 def check_sizes_equal(im_path_1, im_path_2):
-    """ Check sizes equal. Return True if so, False if not.
-    If problem opening the images, return False and say so
+    """ Open the two images at the inputs paths. Return True if they
+    are equal size, and return False otherwise. If there was a problem
+    opening the images, return False and report error in console.
     """
     try:
         im_1 = Image.open(im_path_1)
