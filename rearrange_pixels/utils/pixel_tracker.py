@@ -59,7 +59,6 @@ class PixelTracker():
         self.xy = np.column_stack((x, y))
         self.RGB = np.column_stack((R, G, B))
 
-
     def sort_by_fancybins(self,):
         """ For ordering the pixels, we are interested in two pieces of
         information: the darkness, and the color (hue).
@@ -72,6 +71,10 @@ class PixelTracker():
         In order to sort, we coarse-grain by darkness into '20 Shades
         of Grey', and then within each coarse-grained bin, we order the
         pixels by their color-wheel theta value.
+
+        One obvious shortcoming is that color is continuous on a wheel,
+        but angles of theta = 359 degrees / 1 degree will get sorted to
+        opposite ends! Oh well...
         """
         theta_cwheel = find_theta_colorwheel(self.RGB)
         dist_to_black = np.sum(self.RGB, axis=1)
@@ -103,11 +106,26 @@ class PixelTracker():
 
 
 def find_theta_colorwheel(rgb):
-    """ Obvious shortcoming - orange reds will be very close to red,
-    but purple reds will be very far.
-    Maybe can solve this by resetting scale near least dense portion
-    of colormap?
-    THIS IS THE COMPUTATIONAL BOTTLENECK OF THE DAMN CODE
+    """
+    Inputs
+    ---------
+    rgb: 2d-array in which three columns contain R, G, B, and each row
+    represents a different pixel.
+
+    Returns
+    ---------
+    theta_cwheel: 1d-array, of length equal to the number of pixels.
+        Each element is an angle 'theta' of where this RGB-value
+        was determined to fall on a colorwheel.
+
+    Overview
+    ---------
+    To simplify, we 'drop' the R, G, or B value of each pixel which had
+    the lowest value (e.g. 'browns' are reduced to their two dominant
+    colors). If we imagine a "color-wheel", theta_offset uses the two
+    dominant colors to place us at RG, GB or BR. Then we use the
+    difference between the two dominant colors to finer-tune where
+    exactly on the wheel we should end up.
     """
     # Find which of R/G/B had the least contribution to overall color
     which_least = np.argmin(rgb, axis=1)
