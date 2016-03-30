@@ -1,4 +1,5 @@
-""" This module contains some utility functions which are
+""" This module contains utility functions related to initial selection
+of suitable images.
 """
 
 import Image
@@ -25,12 +26,10 @@ def check_sizes_equal(im_path_1, im_path_2):
 
 
 def select_random_image_pair():
-    """ These are all just hardcoded from a known set.
-    Pick a random set.
+    """ There is a small bank of images that are the same size (500 X 353)
+    Select two randomly and return their paths.
     """
     bank_path = 'image_bank'
-
-    # all the images below are 500 X 353 pixels
     im_list = ['beaux.jpg', 'vangogh.jpg', 'gauguin.jpg', 'seurat.jpg']
     shuffle(im_list)
     two_random_ims = im_list[:2]

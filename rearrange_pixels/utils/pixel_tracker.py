@@ -4,10 +4,7 @@ import numpy as np
 
 class PixelTracker():
     """
-    Some notes about this
-    Can I make the returned instance just BE a dataframe
-    For which I basically append on function calls not native
-    to Pandas?
+    
     """
 
     def __init__(self, path_to_jpg):
