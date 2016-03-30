@@ -34,7 +34,9 @@ class PixelTracker():
 
     def __init__(self, path_to_image):
         
-        """ Blah.
+        """ Given a path to a valid image file (.jpg, .png, etc),
+        record information including the original shape, and also the
+        RGB values and xy-coordinates of each pixel.
         """
         img = Image.open(path_to_image)
         self.shape = img.size[::-1]  # reverse order
@@ -59,23 +61,32 @@ class PixelTracker():
 
 
     def sort_by_fancybins(self,):
-        """ Bin by darkness into N bins
-        Then sort by theta within those bins
-        FIXME: how much of this hard sorting is actually necessary?
+        """ For ordering the pixels, we are interested in two pieces of
+        information: the darkness, and the color (hue).
+
+        'Darkness' is straightforward: sum the R + G + B of each pixel.
+
+        'Color' is less straightforward: here we map them onto a color-
+        wheel. Thus for each RGB value we calculate an 'angle' (theta).
+
+        In order to sort, we coarse-grain by darkness into '20 Shades
+        of Grey', and then within each coarse-grained bin, we order the
+        pixels by their color-wheel theta value.
         """
         theta_cwheel = find_theta_colorwheel(self.RGB)
         dist_to_black = np.sum(self.RGB, axis=1)
 
-        # Coarse grain distance to black
+        # Coarse grain distance to black.
         nbins = 20
         darkest = min(dist_to_black)
         lightest = max(dist_to_black)
         binsize = (lightest - darkest) / float(nbins)
         dist_to_black_broad = np.round(dist_to_black/ binsize)
 
-        # Then sort by theta_cwheel within black
+        # Then sort by theta_cwheel within black.
         idx_sort = np.lexsort((theta_cwheel, dist_to_black_broad))
 
+        # Reorder pixels by this coarsely-dark/fine-color index.
         self.xy = self.xy[idx_sort]
         self.RGB = self.RGB[idx_sort]
 
