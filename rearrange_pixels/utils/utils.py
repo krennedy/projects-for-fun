@@ -4,7 +4,7 @@
 import Image
 
 import numpy as np
-from random import randint
+from random import shuffle, randint
 
 
 def check_sizes_equal(im_path_1, im_path_2):
@@ -29,13 +29,13 @@ def select_random_image_pair():
     """ These are all just hardcoded from a known set.
     Pick a random set.
     """
-    sets = [['figs/dali.jpg', 'figs/vermeer.jpg'],
-            ['figs/beaux.jpg', 'figs/vangogh.jpg']]
-    nsets = len(sets)
-    rand_idx = randint(0, nsets-1)
-    imfile_1, imfile_2 = sets[rand_idx]
-    print "I will be selecting your images now, muahaha!"
-    print "Images selected: %s and %s"%(imfile_1, imfile_2)
+    bank_path = 'image_bank'
+
+    # all the images below are 500 X 353 pixels
+    im_list = ['beaux.jpg', 'vangogh.jpg', 'gauguin.jpg', 'seurat.jpg']
+    shuffle(im_list)
+    two_random_ims = im_list[:2]
+    imfile_1, imfile_2 = ['/'.join([bank_path, im]) for im in two_random_ims]
     return imfile_1, imfile_2
 
 

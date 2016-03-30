@@ -1,4 +1,4 @@
-from tools.utils import find_theta_colorwheel
+from utils import find_theta_colorwheel
 
 import Image
 import numpy as np
