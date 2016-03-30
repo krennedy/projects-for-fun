@@ -3,7 +3,7 @@ This is the controller script, which launches the animation.
 Everything else is a tool.
 """
 
-from utils.utils import check_sizes_equal, select_random_image_pair
+from utils.image_selection import check_sizes_equal, select_random_image_pair
 from utils.pixel_tracker import PixelTracker
 from utils.canvas_animate import Animator
 

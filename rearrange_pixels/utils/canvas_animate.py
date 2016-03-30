@@ -73,7 +73,6 @@ class Animator():
         plt.show()
 
     def updatefig(self, j):
-        print j
         """ Update all 4. Think rgb_A is now called map1.
         """
         self.take_out(self.map1, self.pixA, j)

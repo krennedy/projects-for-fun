@@ -1,5 +1,3 @@
-from utils import find_theta_colorwheel
-
 import Image
 import numpy as np
 
@@ -68,3 +66,39 @@ class PixelTracker():
         ordered correctly.
         """
         self.xy_new = target.xy
+
+
+def find_theta_colorwheel(rgb):
+    """ Obvious shortcoming - orange reds will be very close to red,
+    but purple reds will be very far.
+    Maybe can solve this by resetting scale near least dense portion
+    of colormap?
+    THIS IS THE COMPUTATIONAL BOTTLENECK OF THE DAMN CODE
+    """
+    # Find which of R/G/B had the least contribution to overall color
+    which_least = np.argmin(rgb, axis=1)
+
+    # Based least-dominant color, figure out which 1/3rd of colorwheel to start on
+    theta_offset = which_least * (2 * np.pi / 3.)
+
+    # Find the color differences
+    rg = rgb[:, 0] - rgb[:, 1]
+    gb = rgb[:, 1] - rgb[:, 2]
+    br = rgb[:, 2] - rgb[:, 0]
+
+    mask_least_r = which_least == 0
+    mask_least_g = which_least == 1
+    mask_least_b = which_least == 2
+
+    color_diff = np.empty_like(which_least)
+    color_diff[mask_least_r] = gb[mask_least_r]
+    color_diff[mask_least_g] = br[mask_least_g]
+    color_diff[mask_least_b] = rg[mask_least_b]
+
+    percent_color = color_diff / (255.) # values sposed to be -1 to 1
+
+    delta_theta = percent_color * (np.pi / 3.0)  # div by 3 since constrained to 1/3rd of wheel
+    theta_cwheel = theta_offset - delta_theta
+
+    return theta_cwheel
+
