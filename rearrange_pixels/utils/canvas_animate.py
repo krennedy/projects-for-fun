@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 FIG = plt.figure(figsize=(14,10))
 
 # FIXME: this should be kwarg, not hardcode
-SAVE_SNAPS = False
+SAVE_SNAPS = True
 
 # The number of time-steps to use in the animation
 NSTEPS = 25
@@ -133,7 +133,7 @@ class Animator():
             self.im2.set_array(self.ref2)
 
         if SAVE_SNAPS == True:
-            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=20)
+            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=40)
 
 
     def take_out(self, img, j):
