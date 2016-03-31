@@ -1,8 +1,8 @@
-#######################################################################
-#####                                                             #####     
-#####  The Problem                                                ##### 
-#####                                                             ##### 
-#######################################################################
+# #####################################################################
+# ####                                                            #####     
+# ####  The Problem                                               ##### 
+# ####                                                            ##### 
+# #####################################################################
 
 The inspiration for this project comes from a challenge on the "Code 
 Golf" section of StackOverflow, originally posted by user Helke Homba
@@ -17,11 +17,11 @@ My ambition was to do this in a speedy and user-friendly way - not
 worrying about character count. The rearrangement is still coarse -
 I'd love even further refinement sometime :)
 
-#######################################################################
-#####                                                             #####     
-#####  Running the Rearrangement                                  ##### 
-#####                                                             ##### 
-#######################################################################
+# #####################################################################
+# ####                                                            #####     
+# ####  Running the Rearrangement                                 ##### 
+# ####                                                            ##### 
+# #####################################################################
 
 Within rearrange_pixels/:
 > python launch_switch.py [path_to_first_iamge] [path_to_second_image]
@@ -30,11 +30,11 @@ The paths to the two images to be palette-swapped are optional. If none
 are provided, then two will be randomly selected for you.
 
 
-#######################################################################
-#####                                                             #####     
-#####  Examples                                                   ##### 
-#####                                                             ##### 
-#######################################################################
+# #####################################################################
+# ####                                                            #####     
+# ####  Examples                                                  ##### 
+# ####                                                            ##### 
+# #####################################################################
 
 A couple of examples of the rearrangement are shown in examples/. This
 includes a gif of the rearrangement, and a 'still' of another swap.
