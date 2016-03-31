@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 FIG = plt.figure(figsize=(14,10))
 
 # FIXME: this should be kwarg, not hardcode
-SAVE_SNAPS = False
+SAVE_SNAPS = True
 
 # The number of time-steps to use in the animation
 NSTEPS = 25
@@ -133,18 +133,18 @@ class Animator():
             self.im2.set_array(self.ref2)
 
         if SAVE_SNAPS == True:
-            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=20)
+            plt.savefig('saved_snaps/ex_%s.png'%j, dpi=40)
 
 
     def take_out(self, img, j):
         """ Take some (j*nstep) pixels out of img, and replace them
-        with grey (R = G = B = 155).
+        with white (R = G = B = 255).
         """
         initial_shape = img.shape
         img_flat = img.reshape(self.npix, 3)
         start_idx = j * self.nstep
         stop_idx = start_idx + self.nstep
-        img_flat[start_idx:stop_idx] = np.array([155, 155, 155]).astype('uint8')
+        img_flat[start_idx:stop_idx] = np.array([255, 255, 255]).astype('uint8')
         img = img_flat.reshape(initial_shape)
         return img
 

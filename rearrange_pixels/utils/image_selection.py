@@ -2,6 +2,8 @@
 of suitable images.
 """
 
+import os
+
 import Image
 
 from random import shuffle
@@ -26,11 +28,11 @@ def check_sizes_equal(im_path_1, im_path_2):
 
 
 def select_random_image_pair():
-    """ There is a small bank of images that are the same size (500 X 353)
+    """ There is a small bank of images that are the same size (600X475)
     Select two randomly and return their paths.
     """
     bank_path = 'image_bank'
-    im_list = ['beaux.jpg', 'vangogh.jpg', 'gauguin.jpg', 'seurat.jpg']
+    im_list = os.listdir(bank_path)
     shuffle(im_list)
     two_random_ims = im_list[:2]
     imfile_1, imfile_2 = ['/'.join([bank_path, im]) for im in two_random_ims]

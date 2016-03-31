@@ -11,7 +11,7 @@ The crux of the problem is to take two images of equal pixel-size, and
 to recreate the second image as closely as possible, by best rearrang-
 ing the pixels of the first image.
 
-My ambition was to do this in a speedy and user-friendly way - not
+My goal is to do this in a speedy and user-friendly way - not
 worrying about character count. The rearrangement is still coarse -
 I'd love even further refinement sometime :)
 
@@ -30,7 +30,7 @@ are provided, then two will be randomly selected for you.
 #####  Examples                                                    
 #######################################################################
 
-A couple of examples of the rearrangement are shown in examples/. This
+A few examples of the rearrangement are shown in examples/. This
 includes a gif of the rearrangement, and a 'still' of another swap.
 
 
