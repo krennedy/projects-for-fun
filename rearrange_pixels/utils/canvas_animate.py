@@ -180,8 +180,8 @@ class Animator():
 
 
 def sort_rgb_into_image_order(rgb, xy):
-    """ We are given an rgb array of pixels, and the xy-coord they are to be at.
-    From this, reorder rgb so it can display new image
+    """ Given an rgb array of pixels, and the xy-coordinates they are
+    to be at. From this, reorder rgb as they are supposed to appear.
     """
     x = xy[:, 0]
     y = xy[:, 1]
@@ -191,9 +191,8 @@ def sort_rgb_into_image_order(rgb, xy):
 
 
 def convert_to_imshow_format(rgb, image_shape):
-    """ PM what it says. Takes almost no time!
-    rgb is pixel LIST in format XXX.
-    Reshape to XXX and convert to unsigned 8-bit integers.
+    """ Take a list of rgb values which are already in order for
+    display, and reshape them into the specified image_shape.
     """
     xdim, ydim = image_shape
     rgb_display = rgb.reshape((xdim, ydim, 3))
@@ -202,7 +201,7 @@ def convert_to_imshow_format(rgb, image_shape):
 
 
 def make_white_image(inshape):
-    """ Returns an all-white image of the input size
+    """ Returns an all-white image (R = G = B = 255) of the input size.
     """
     outshape = inshape + (3,)
     white_map = np.ones(outshape).astype('uint8') * 255
