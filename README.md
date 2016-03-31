@@ -1,7 +1,5 @@
 #######################################################################
-#####                                                             #####     
-#####  The Problem                                                ##### 
-#####                                                             ##### 
+#####  The Problem                                                 
 #######################################################################
 
 The inspiration for this project comes from a challenge on the "Code 
@@ -18,9 +16,7 @@ worrying about character count. The rearrangement is still coarse -
 I'd love even further refinement sometime :)
 
 #######################################################################
-#####                                                             #####     
-#####  Running the Rearrangement                                  ##### 
-#####                                                             ##### 
+#####  Running the Rearrangement                                   
 #######################################################################
 
 Within rearrange_pixels/:
@@ -31,9 +27,7 @@ are provided, then two will be randomly selected for you.
 
 
 #######################################################################
-#####                                                             #####     
-#####  Examples                                                   ##### 
-#####                                                             ##### 
+#####  Examples                                                    
 #######################################################################
 
 A couple of examples of the rearrangement are shown in examples/. This
